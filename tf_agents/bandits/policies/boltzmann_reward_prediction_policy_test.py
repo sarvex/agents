@@ -251,11 +251,10 @@ class BoltzmannRewardPredictionPolicyTest(test_utils.TestCase):
 
   def testBoltzmannGumbelPredictedRewards(self):
     tf.compat.v1.set_random_seed(1)
-    num_samples_list = []
-    for k in range(3):
-      num_samples_list.append(
-          tf.compat.v2.Variable(
-              tf.zeros([], dtype=tf.int32), name='num_samples_{}'.format(k)))
+    num_samples_list = [
+        tf.compat.v2.Variable(tf.zeros([], dtype=tf.int32),
+                              name=f'num_samples_{k}') for k in range(3)
+    ]
     num_samples_list[0].assign_add(2)
     num_samples_list[1].assign_add(4)
     num_samples_list[2].assign_add(1)

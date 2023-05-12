@@ -45,11 +45,7 @@ class BatchedPyMetric(py_metric.PyStepMetric):
                prefix: Text = 'Metrics'):
     """Creates a BatchedPyMetric metric."""
     self._metric_class = metric_class
-    if metric_args is None:
-      self._metric_args = {}
-    else:
-      self._metric_args = metric_args
-
+    self._metric_args = {} if metric_args is None else metric_args
     if not name:
       name = self._metric_class(**self._metric_args).name
     super(BatchedPyMetric, self).__init__(name, prefix=prefix)
@@ -80,11 +76,9 @@ class BatchedPyMetric(py_metric.PyStepMetric):
     if not self._built:
       self.build(batch_size)
     if batch_size != len(self._metrics):
-      raise ValueError('Batch size {} does not match previously set batch '
-                       'size {}. Make sure your batch size is set correctly '
-                       'in BatchedPyMetric initialization and that the batch '
-                       'size remains constant.'.format(batch_size,
-                                                       len(self._metrics)))
+      raise ValueError(
+          f'Batch size {batch_size} does not match previously set batch size {len(self._metrics)}. Make sure your batch size is set correctly in BatchedPyMetric initialization and that the batch size remains constant.'
+      )
 
     for metric, trajectory in zip(self._metrics, trajectories):
       metric(trajectory)

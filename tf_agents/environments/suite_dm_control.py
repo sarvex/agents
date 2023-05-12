@@ -20,6 +20,7 @@ Follow these instructions to install it:
 https://github.com/deepmind/dm_control#installation-and-requirements
 
 """
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -40,10 +41,7 @@ if _TRY_IMPORT:
     from dm_control.suite.wrappers import pixels  # pylint: disable=g-import-not-at-top
   except ImportError:
     suite = None
-    if TYPE_CHECKING:  # Always evaluates to False at runtime.
-      DMEnvironment = Any
-    else:
-      DMEnvironment = None
+    DMEnvironment = Any if TYPE_CHECKING else None
 else:
   from dm_env import Environment as DMEnvironment  # pylint: disable=g-import-not-at-top
   from dm_control import suite  # pylint: disable=g-import-not-at-top

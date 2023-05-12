@@ -65,12 +65,13 @@ class DummyCategoricalNet(network.Network):
     bias_initializer = tf.keras.initializers.Ones()
 
     # Store custom layers that can be serialized through the Checkpointable API.
-    self._dummy_layers = []
-    self._dummy_layers.append(
+    self._dummy_layers = [
         tf.keras.layers.Dense(
             num_actions * num_atoms,
             kernel_initializer=kernel_initializer,
-            bias_initializer=bias_initializer))
+            bias_initializer=bias_initializer,
+        )
+    ]
 
   @property
   def num_atoms(self):

@@ -51,8 +51,7 @@ class SimpleThresholdConstraint(constraints.BaseConstraint):
           self._action_spec.minimum, self._action_spec.maximum + 1)
       actions = tf.reshape(actions, [1, -1])
       actions = tf.tile(actions, [self.batch_size, 1])
-    feasibility_prob = tf.cast(tf.greater(actions, self.threshold), tf.float32)
-    return feasibility_prob
+    return tf.cast(tf.greater(actions, self.threshold), tf.float32)
 
 
 class TFMetricsTest(parameterized.TestCase, tf.test.TestCase):

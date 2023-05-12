@@ -126,8 +126,7 @@ def train_eval(
   strategy = strategy_utils.get_strategy(tpu, use_gpu)
 
   if not dataset_path.endswith('.tfrecord'):
-    dataset_path = os.path.join(dataset_path, env_name,
-                                '%s*.tfrecord' % env_name)
+    dataset_path = os.path.join(dataset_path, env_name, f'{env_name}*.tfrecord')
   logging.info('Loading dataset from %s', dataset_path)
   dataset_paths = tf.io.gfile.glob(dataset_path)
 

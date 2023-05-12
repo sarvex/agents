@@ -98,8 +98,7 @@ class CategoricalQNetwork(network.Network):
         name=name)
 
     if not isinstance(action_spec, tensor_spec.BoundedTensorSpec):
-      raise TypeError('action_spec must be a BoundedTensorSpec. Got: %s' % (
-          action_spec,))
+      raise TypeError(f'action_spec must be a BoundedTensorSpec. Got: {action_spec}')
 
     self._num_actions = action_spec.maximum - action_spec.minimum + 1
     self._num_atoms = num_atoms

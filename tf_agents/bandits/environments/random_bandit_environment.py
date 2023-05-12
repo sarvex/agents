@@ -86,18 +86,19 @@ class RandomBanditEnvironment(bte.BanditTFEnvironment):
           'reward_distribution', observation_batch_shape)
 
     if reward_event_shape.rank != 0:
-      raise ValueError('`reward_distribution` must have event_shape (); '
-                       'got {}'.format(reward_event_shape))
+      raise ValueError(
+          f'`reward_distribution` must have event_shape (); got {reward_event_shape}'
+      )
 
     if reward_distribution.dtype != tf.float32:
-      raise ValueError('`reward_distribution` must have dtype float32; '
-                       'got {}'.format(reward_distribution.float32))
+      raise ValueError(
+          f'`reward_distribution` must have dtype float32; got {reward_distribution.float32}'
+      )
 
     if observation_batch_shape[0] != reward_batch_shape[0]:
       raise ValueError(
-          '`reward_distribution` and `observation_distribution` must have the '
-          'same batch shape; got {} and {}'.format(
-              reward_batch_shape, observation_batch_shape))
+          f'`reward_distribution` and `observation_distribution` must have the same batch shape; got {reward_batch_shape} and {observation_batch_shape}'
+      )
     batch_size = tf.compat.dimension_value(observation_batch_shape[0])
     self._observation_distribution = observation_distribution
     self._reward_distribution = reward_distribution

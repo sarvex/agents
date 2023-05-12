@@ -159,13 +159,12 @@ class DqnCartPoleAgentBenchmark(tf.test.Benchmark):
         batch_size=batch_size,
         log_steps=log_steps,
         iterator=iterator)
-    print('Avg step time:{}'.format(history.get_average_step_time()))
-    print('Avg exp/sec:{}'.format(history.get_average_examples_per_second()))
-    metrics = []
-    metrics.append({
+    print(f'Avg step time:{history.get_average_step_time()}')
+    print(f'Avg exp/sec:{history.get_average_examples_per_second()}')
+    metrics = [{
         'name': 'exp_per_second',
-        'value': history.get_average_examples_per_second()
-    })
+        'value': history.get_average_examples_per_second(),
+    }]
     metrics.append({
         'name': 'steps_per_second',
         'value': 1 / history.get_average_step_time()
@@ -284,7 +283,7 @@ class DqnCartPoleAgentBenchmarkTest(tf.test.TestCase):
 
   @unittest.skipUnless(tf2.enabled(), 'TF 2.x only test.')
   def testEagerCpu(self):
-    print('TF 2.0 enable:{}'.format(tf2.enabled()))
+    print(f'TF 2.0 enable:{tf2.enabled()}')
     strategy = distribution_strategy_utils.get_distribution_strategy(
         distribution_strategy='default', num_gpus=0)
     self._run(strategy, tf_function=False)

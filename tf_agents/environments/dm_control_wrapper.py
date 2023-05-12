@@ -31,9 +31,7 @@ _as_float32_array = functools.partial(np.asarray, dtype=np.float32)
 
 
 def _maybe_float32(o):
-  if o.dtype == np.float64:
-    return _as_float32_array(o)
-  return o
+  return _as_float32_array(o) if o.dtype == np.float64 else o
 
 
 def convert_time_step(time_step):
@@ -101,6 +99,5 @@ class DmControlWrapper(wrappers.PyEnvironmentBaseWrapper):
 
   def render(self, mode='rgb_array'):
     if mode != 'rgb_array':
-      raise ValueError('Only rgb_array rendering mode is supported. Got %s' %
-                       mode)
+      raise ValueError(f'Only rgb_array rendering mode is supported. Got {mode}')
     return self._env.physics.render(**self._render_kwargs)

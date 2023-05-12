@@ -73,8 +73,7 @@ class PyMetricSummariesTest(tf.test.TestCase):
         continue
       self.assertEqual(value, tf.make_ndarray(record.summary.value[0].tensor))
       return
-    self.fail(
-        'Could not find record for tag {} and step {}'.format(tag, step))
+    self.fail(f'Could not find record for tag {tag} and step {step}')
 
   def get_records(self):
     files = os.listdir(self.summary_dir)

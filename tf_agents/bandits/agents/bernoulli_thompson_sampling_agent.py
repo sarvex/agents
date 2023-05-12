@@ -51,14 +51,14 @@ class BernoulliBanditVariableCollection(tf.Module):
     tf.Module.__init__(self, name=name)
     # It holds the `alpha` parameter of the beta distribution of each arm.
     self.alpha = [
-        tf.compat.v2.Variable(tf.ones([], dtype=dtype),
-                              name='alpha_{}'.format(k)) for k in range(
-                                  num_actions)]
+        tf.compat.v2.Variable(tf.ones([], dtype=dtype), name=f'alpha_{k}')
+        for k in range(num_actions)
+    ]
     # It holds the `beta` parameter of the beta distribution of each arm.
     self.beta = [
-        tf.compat.v2.Variable(tf.ones([], dtype=dtype),
-                              name='beta_{}'.format(k)) for k in range(
-                                  num_actions)]
+        tf.compat.v2.Variable(tf.ones([], dtype=dtype), name=f'beta_{k}')
+        for k in range(num_actions)
+    ]
 
 
 @gin.configurable

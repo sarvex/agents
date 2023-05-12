@@ -37,9 +37,8 @@ def check_single_floating_network_output(
           and output_spec.shape == expected_output_shape
           and output_spec.dtype.is_floating):
     raise ValueError(
-        'Expected {} to emit a floating point tensor with inner dims '
-        '{}; but saw network output spec: {}'
-        .format(label, expected_output_shape, output_spec))
+        f'Expected {label} to emit a floating point tensor with inner dims {expected_output_shape}; but saw network output spec: {output_spec}'
+    )
 
 
 class BatchSquash(object):
@@ -174,19 +173,17 @@ def mlp_layers(conv_layer_params=None,
   if fc_layer_params is not None:
     if dropout_layer_params is None:
       dropout_layer_params = [None] * len(fc_layer_params)
-    else:
-      if len(dropout_layer_params) != len(fc_layer_params):
-        raise ValueError('Dropout and full connected layer parameter lists have'
-                         ' different lengths (%d vs. %d.)' %
-                         (len(dropout_layer_params), len(fc_layer_params)))
+    elif len(dropout_layer_params) != len(fc_layer_params):
+      raise ValueError('Dropout and full connected layer parameter lists have'
+                       ' different lengths (%d vs. %d.)' %
+                       (len(dropout_layer_params), len(fc_layer_params)))
 
     if weight_decay_params is None:
       weight_decay_params = [None] * len(fc_layer_params)
-    else:
-      if len(weight_decay_params) != len(fc_layer_params):
-        raise ValueError('Weight decay and fully connected layer parameter '
-                         'lists have different lengths (%d vs. %d.)' %
-                         (len(weight_decay_params), len(fc_layer_params)))
+    elif len(weight_decay_params) != len(fc_layer_params):
+      raise ValueError('Weight decay and fully connected layer parameter '
+                       'lists have different lengths (%d vs. %d.)' %
+                       (len(weight_decay_params), len(fc_layer_params)))
 
     for num_units, dropout_params, weight_decay in zip(
         fc_layer_params, dropout_layer_params, weight_decay_params):

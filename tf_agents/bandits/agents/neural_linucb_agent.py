@@ -77,15 +77,15 @@ class NeuralLinUCBVariableCollection(tf.Module):
 
     for k in range(num_actions):
       self.cov_matrix_list.append(
-          tf.compat.v2.Variable(
-              tf.zeros([encoding_dim, encoding_dim], dtype=dtype),
-              name='a_{}'.format(k)))
+          tf.compat.v2.Variable(tf.zeros([encoding_dim, encoding_dim],
+                                         dtype=dtype),
+                                name=f'a_{k}'))
       self.data_vector_list.append(
-          tf.compat.v2.Variable(
-              tf.zeros(encoding_dim, dtype=dtype), name='b_{}'.format(k)))
+          tf.compat.v2.Variable(tf.zeros(encoding_dim, dtype=dtype),
+                                name=f'b_{k}'))
       self.num_samples_list.append(
-          tf.compat.v2.Variable(
-              tf.zeros([], dtype=dtype), name='num_samples_{}'.format(k)))
+          tf.compat.v2.Variable(tf.zeros([], dtype=dtype),
+                                name=f'num_samples_{k}'))
 
 
 @gin.configurable
@@ -361,9 +361,10 @@ class NeuralLinUCBAgent(tf_agent.TFAgent):
                 chosen_actions_predicted_rewards,
                 weights=loss_mask_for_arm)
             tf.compat.v2.summary.scalar(
-                name='loss_arm_' + str(k),
+                name=f'loss_arm_{str(k)}',
                 data=loss_for_arm,
-                step=self.train_step_counter)
+                step=self.train_step_counter,
+            )
 
     return tf_agent.LossInfo(loss, extra=())
 

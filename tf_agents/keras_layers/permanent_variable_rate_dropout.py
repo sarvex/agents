@@ -45,16 +45,14 @@ class PermanentVariableRateDropout(tf.keras.layers.Dropout):
 
     if training:
       rate = self._get_dropout_value()
-      outputs = tf.nn.dropout(
+      return tf.nn.dropout(
           inputs,
           noise_shape=self._get_noise_shape(inputs),
           seed=self.seed,
-          rate=rate)
-      return outputs
+          rate=rate,
+      )
     else:
       return inputs
 
   def _get_dropout_value(self):
-    if callable(self.rate):
-      return self.rate()
-    return self.rate
+    return self.rate() if callable(self.rate) else self.rate

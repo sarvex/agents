@@ -127,8 +127,7 @@ class PiecewiseBernoulliPyEnvironment(
     while self._current_time >= self._next_change:
       duration = int(next(self._change_duration_generator))
       if duration < 0:
-        raise ValueError(
-            'Generated duration must be non-negative. Got {}.'.format(duration))
+        raise ValueError(f'Generated duration must be non-negative. Got {duration}.')
       self._next_change += duration
       self._current_piece = (self._current_piece + 1) % self._num_pieces
 

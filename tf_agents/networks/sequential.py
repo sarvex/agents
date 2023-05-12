@@ -103,13 +103,12 @@ class Sequential(network.Network):
       TypeError: If any of the layers are not instances of keras `Layer`.
     """
     if not layers:
-      raise ValueError(
-          '`layers` must not be empty; saw: {}'.format(layers))
+      raise ValueError(f'`layers` must not be empty; saw: {layers}')
     for layer in layers:
       if not isinstance(layer, tf.keras.layers.Layer):
         raise TypeError(
-            'Expected all layers to be instances of keras Layer, but saw'
-            ': \'{}\''.format(layer))
+            f"Expected all layers to be instances of keras Layer, but saw: \'{layer}\'"
+        )
 
     layers = [
         rnn_wrapper.RNNWrapper(layer) if isinstance(layer, tf.keras.layers.RNN)
@@ -187,42 +186,36 @@ class Sequential(network.Network):
               network_state=network_state[stateful_layer_idx],
               **kwargs)
 
-          if self._layer_state_is_list[i]:
-            next_network_state[stateful_layer_idx] = tuple(next_state)
-          else:
-            next_network_state[stateful_layer_idx] = next_state
-
+          next_network_state[stateful_layer_idx] = (
+              tuple(next_state) if self._layer_state_is_list[i] else next_state)
           stateful_layer_idx += 1
         else:
           inputs, _ = layer(inputs, **kwargs)
-      else:
-        # Generic Keras layer
-        if self._layer_has_state[i]:
-          # The layer maintains state.  If a state was provided at input to
-          # `call`, then use it.  Otherwise ask for an initial state.
-          maybe_network_state = network_state[stateful_layer_idx]
+      elif self._layer_has_state[i]:
+        # The layer maintains state.  If a state was provided at input to
+        # `call`, then use it.  Otherwise ask for an initial state.
+        maybe_network_state = network_state[stateful_layer_idx]
 
-          input_state = maybe_network_state
+        input_state = maybe_network_state
 
-          # pylint: disable=literal-comparison
-          if maybe_network_state is None:
-            input_state = layer.get_initial_state(inputs)
-          elif input_state is not () and self._layer_state_is_list[i]:
-            input_state = list(input_state)
-          # pylint: enable=literal-comparison
+        if input_state is None:
+          input_state = layer.get_initial_state(inputs)
+        elif input_state is not () and self._layer_state_is_list[i]:
+          input_state = list(input_state)
+        # pylint: enable=literal-comparison
 
-          outputs = layer(inputs, input_state, **layer_kwargs)
-          inputs, next_state = outputs
+        outputs = layer(inputs, input_state, **layer_kwargs)
+        inputs, next_state = outputs
 
-          if self._layer_state_is_list[i]:
-            next_network_state[stateful_layer_idx] = tuple(next_state)
-          else:
-            next_network_state[stateful_layer_idx] = next_state
-
-          stateful_layer_idx += 1
+        if self._layer_state_is_list[i]:
+          next_network_state[stateful_layer_idx] = tuple(next_state)
         else:
-          # Does not maintain state.
-          inputs = layer(inputs, **layer_kwargs)
+          next_network_state[stateful_layer_idx] = next_state
+
+        stateful_layer_idx += 1
+      else:
+        # Does not maintain state.
+        inputs = layer(inputs, **layer_kwargs)
 
     return inputs, tuple(next_network_state)
 
@@ -262,7 +255,7 @@ class Sequential(network.Network):
 
   @property
   def trainable(self) -> bool:
-    return any([l.trainable for l in self._sequential_layers])
+    return any(l.trainable for l in self._sequential_layers)
 
   @trainable.setter
   def trainable(self, value: bool):
@@ -270,13 +263,13 @@ class Sequential(network.Network):
       l.trainable = value
 
   def get_config(self) -> Mapping[int, Mapping[str, Any]]:
-    config = {}
-    for i, layer in enumerate(self._sequential_layers):
-      config[i] = {
-          'class_name': layer.__class__.__name__,
-          'config': copy.deepcopy(layer.get_config())
-      }
-    return config
+    return {
+        i: {
+            'class_name': layer.__class__.__name__,
+            'config': copy.deepcopy(layer.get_config()),
+        }
+        for i, layer in enumerate(self._sequential_layers)
+    }
 
   @classmethod
   def from_config(cls, config, custom_objects=None) -> 'Sequential':

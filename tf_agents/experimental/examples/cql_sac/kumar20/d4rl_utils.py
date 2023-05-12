@@ -32,6 +32,4 @@ def load_d4rl(env_name, default_time_limit=1000):
   if gym_spec.max_episode_steps in [0, None]:
     gym_env = TimeLimit(gym_env, max_episode_steps=default_time_limit)
 
-  # Wrap TF-Agents environment.
-  env = gym_wrapper.GymWrapper(gym_env)
-  return env
+  return gym_wrapper.GymWrapper(gym_env)

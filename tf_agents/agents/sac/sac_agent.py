@@ -254,8 +254,8 @@ class SacAgent(tf_agent.TFAgent):
     for spec in flat_action_spec:
       if spec.dtype.is_integer:
         raise NotImplementedError(
-            'SacAgent does not currently support discrete actions. '
-            'Action spec: {}'.format(action_spec))
+            f'SacAgent does not currently support discrete actions. Action spec: {action_spec}'
+        )
 
   def _get_default_target_entropy(self, action_spec):
     # If target_entropy was not passed, set it to -dim(A)/2.0
@@ -263,11 +263,10 @@ class SacAgent(tf_agent.TFAgent):
     # However this formulation has also been used in practice by the original
     # authors and has in our experience been more stable for gym/mujoco.
     flat_action_spec = tf.nest.flatten(action_spec)
-    target_entropy = -np.sum([
+    return (-np.sum([
         np.product(single_spec.shape.as_list())
         for single_spec in flat_action_spec
-    ]) / 2.0
-    return target_entropy
+    ]) / 2.0)
 
   def _initialize(self):
     """Returns an op to initialize the agent.
@@ -704,7 +703,7 @@ class SacAgent(tf_agent.TFAgent):
       try:
         for name, action_dist in nest_utils.flatten_with_joined_paths(
             action_distribution):
-          common.generate_tensor_summaries('entropy_' + name,
+          common.generate_tensor_summaries(f'entropy_{name}',
                                            action_dist.entropy(),
                                            self.train_step_counter)
       except NotImplementedError:

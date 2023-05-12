@@ -63,12 +63,11 @@ def run_summaries(metrics: Sequence[PyMetricType],
 
   for metric in metrics:
     if metric.summary_op is None:
-      raise RuntimeError('metric.tf_summaries() must be called on py_metric '
-                         '{} before attempting to run '
-                         'summaries.'.format(metric.name))
+      raise RuntimeError(
+          f'metric.tf_summaries() must be called on py_metric {metric.name} before attempting to run summaries.'
+      )
   summary_ops = [metric.summary_op for metric in metrics]
-  feed_dict = dict(
-      (metric.summary_placeholder, metric.result()) for metric in metrics)
+  feed_dict = {metric.summary_placeholder: metric.result() for metric in metrics}
   session.run(summary_ops, feed_dict=feed_dict)
 
 
@@ -125,9 +124,11 @@ class PyMetric(tf.Module):
       raise RuntimeError('metric.tf_summaries() can only be called once.')
 
     tag = common.join_scope(self.prefix, self.name)
-    summaries = []
-    summaries.append(tf.compat.v2.summary.scalar(
-        name=tag, data=self.summary_placeholder, step=train_step))
+    summaries = [
+        tf.compat.v2.summary.scalar(name=tag,
+                                    data=self.summary_placeholder,
+                                    step=train_step)
+    ]
     prefix = self.prefix
     if prefix:
       prefix += '_'
@@ -135,14 +136,13 @@ class PyMetric(tf.Module):
       # Skip plotting the metrics against itself.
       if self.name == step_metric.name:
         continue
-      step_tag = '{}vs_{}/{}'.format(prefix, step_metric.name, self.name)
+      step_tag = f'{prefix}vs_{step_metric.name}/{self.name}'
       if isinstance(step_metric, PyMetric):
         step_tensor = step_metric.summary_placeholder
       elif isinstance(step_metric, tf_metric.TFStepMetric):
         step_tensor = step_metric.result()
       else:
-        raise ValueError('step_metric is not PyMetric or TFStepMetric: '
-                         '{}'.format(step_metric))
+        raise ValueError(f'step_metric is not PyMetric or TFStepMetric: {step_metric}')
       summaries.append(tf.compat.v2.summary.scalar(
           name=step_tag,
           data=self.summary_placeholder,
@@ -161,7 +161,7 @@ class PyMetric(tf.Module):
       dtype = tf.as_dtype(result.dtype)
       shape = result.shape
       self._summary_placeholder = tf.compat.v1.placeholder(
-          dtype, shape=shape, name='{}_ph'.format(self.name))
+          dtype, shape=shape, name=f'{self.name}_ph')
     return self._summary_placeholder
 
   @property

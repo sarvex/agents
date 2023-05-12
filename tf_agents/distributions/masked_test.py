@@ -49,9 +49,7 @@ class MaskedCategoricalTest(tf.test.TestCase):
       logits_np = s.run(logits_tensor)
 
       # Draw samples & confirm we never draw a masked sample
-      for _ in range(100):
-        results.append(s.run(sample))
-
+      results.extend(s.run(sample) for _ in range(100))
     self.assertAllEqual([0.5, 0, 0.5], probs_np)
     self.assertAllEqual([100, logits_tensor.dtype.min, 100], logits_np)
     self.assertNotIn(1, results)

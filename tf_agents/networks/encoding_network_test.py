@@ -327,24 +327,23 @@ class EncodingNetworkTest(test_utils.TestCase, parameterized.TestCase):
     if not tf.executing_eagerly():
       self.skipTest('This test is TF2 only.')
 
-    inputs = {}
-    features = {}
-    tensors = {}
-    specs = {}
-    expected_dim = 0
-
     indicator_key = 'indicator_key'
     vocab_list = [2, 3, 4]
-    inputs[indicator_key] = tf.keras.Input(
-        shape=(1,), dtype=tf.dtypes.int32, name=indicator_key)
-    features[indicator_key] = keras_preprocessing.IntegerLookup(
-        vocabulary=vocab_list, num_oov_indices=0, output_mode='multi_hot')(
-            inputs[indicator_key])
+    inputs = {
+        indicator_key:
+        tf.keras.Input(shape=(1, ), dtype=tf.dtypes.int32, name=indicator_key)
+    }
+    features = {
+        indicator_key:
+        keras_preprocessing.IntegerLookup(vocabulary=vocab_list,
+                                          num_oov_indices=0,
+                                          output_mode='multi_hot')(
+                                              inputs[indicator_key])
+    }
     state_input = [3, 2, 2, 4, 3]
-    tensors[indicator_key] = tf.expand_dims(state_input, -1)
-    specs[indicator_key] = tensor_spec.TensorSpec([1], tf.int32)
-    expected_dim += len(vocab_list)
-
+    tensors = {indicator_key: tf.expand_dims(state_input, -1)}
+    specs = {indicator_key: tensor_spec.TensorSpec([1], tf.int32)}
+    expected_dim = 0 + len(vocab_list)
     embedding_key = 'embedding_key'
     embedding_dim = 3
     vocab_list = [2, 3, 4]

@@ -231,8 +231,10 @@ class BehavioralCloningAgentTest(test_utils.TestCase, parameterized.TestCase):
         self.assertEqual(value, 0)
       else:
         self.assertAllEqual(
-            value, np.zeros_like(value),
-            msg='{} has var mean {}, expected 0.'.format(var.name, value))
+            value,
+            np.zeros_like(value),
+            msg=f'{var.name} has var mean {value}, expected 0.',
+        )
 
   def verifyTrainAndRestore(self,
                             observation_spec,

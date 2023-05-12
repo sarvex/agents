@@ -87,14 +87,14 @@ class BernoulliThompsonSamplingPolicy(tf_policy.TFPolicy):
         action_spec.shape.rank > 1 or
         action_spec.shape.num_elements() != 1):
       raise NotImplementedError(
-          'action_spec must be a BoundedTensorSpec of integer type and '
-          'shape (). Found {}.'.format(action_spec))
+          f'action_spec must be a BoundedTensorSpec of integer type and shape (). Found {action_spec}.'
+      )
     self._expected_num_actions = action_spec.maximum - action_spec.minimum + 1
 
     if len(alpha) != self._expected_num_actions:
       raise ValueError(
-          'The size of alpha parameters is expected to be equal '
-          'to the number of actions, but found to be {}'.format(len(alpha)))
+          f'The size of alpha parameters is expected to be equal to the number of actions, but found to be {len(alpha)}'
+      )
     self._alpha = alpha
     if len(alpha) != len(beta):
       raise ValueError(

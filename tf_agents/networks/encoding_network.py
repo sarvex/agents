@@ -61,7 +61,7 @@ def _copy_layer(layer):
     ValueError: If `layer` cannot be correctly cloned.
   """
   if not isinstance(layer, tf.keras.layers.Layer):
-    raise TypeError('layer is not a keras layer: %s' % str(layer))
+    raise TypeError(f'layer is not a keras layer: {str(layer)}')
 
   # pylint:disable=unidiomatic-typecheck
   if type(layer) == tf.compat.v1.keras.layers.DenseFeatures:
@@ -224,8 +224,7 @@ class EncodingNetwork(network.Network):
       elif conv_type == '1d':
         conv_layer_type = tf.keras.layers.Conv1D
       else:
-        raise ValueError('unsupported conv type of %s. Use 1d or 2d' % (
-            conv_type))
+        raise ValueError(f'unsupported conv type of {conv_type}. Use 1d or 2d')
 
       for config in conv_layer_params:
         if len(config) == 4:
@@ -251,18 +250,16 @@ class EncodingNetwork(network.Network):
     if fc_layer_params:
       if dropout_layer_params is None:
         dropout_layer_params = [None] * len(fc_layer_params)
-      else:
-        if len(dropout_layer_params) != len(fc_layer_params):
-          raise ValueError('Dropout and fully connected layer parameter lists'
-                           'have different lengths (%d vs. %d.)' %
-                           (len(dropout_layer_params), len(fc_layer_params)))
+      elif len(dropout_layer_params) != len(fc_layer_params):
+        raise ValueError('Dropout and fully connected layer parameter lists'
+                         'have different lengths (%d vs. %d.)' %
+                         (len(dropout_layer_params), len(fc_layer_params)))
       if weight_decay_params is None:
         weight_decay_params = [None] * len(fc_layer_params)
-      else:
-        if len(weight_decay_params) != len(fc_layer_params):
-          raise ValueError('Weight decay and fully connected layer parameter '
-                           'lists have different lengths (%d vs. %d.)' %
-                           (len(weight_decay_params), len(fc_layer_params)))
+      elif len(weight_decay_params) != len(fc_layer_params):
+        raise ValueError('Weight decay and fully connected layer parameter '
+                         'lists have different lengths (%d vs. %d.)' %
+                         (len(weight_decay_params), len(fc_layer_params)))
 
       for num_units, dropout_params, weight_decay in zip(
           fc_layer_params, dropout_layer_params, weight_decay_params):
@@ -310,11 +307,12 @@ class EncodingNetwork(network.Network):
     if self._flat_preprocessing_layers is None:
       processed = observation
     else:
-      processed = []
-      for obs, layer in zip(
-          nest.flatten_up_to(self._preprocessing_nest, observation),
-          self._flat_preprocessing_layers):
-        processed.append(layer(obs, training=training))
+      processed = [
+          layer(obs, training=training) for obs, layer in zip(
+              nest.flatten_up_to(self._preprocessing_nest, observation),
+              self._flat_preprocessing_layers,
+          )
+      ]
       if len(processed) == 1 and self._preprocessing_combiner is None:
         # If only one observation is passed and the preprocessing_combiner
         # is unspecified, use the preprocessed version of this observation.

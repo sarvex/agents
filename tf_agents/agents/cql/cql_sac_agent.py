@@ -226,8 +226,8 @@ class CqlSacAgent(sac_agent.SacAgent):
     flat_action_spec = tf.nest.flatten(action_spec)
     if len(flat_action_spec) > 1:
       raise ValueError(
-          'Only single action specs are supported now, but action spec is: {}'
-          .format(action_spec))
+          f'Only single action specs are supported now, but action spec is: {action_spec}'
+      )
 
   def _train(self, experience, weights):
     """Returns a train op to update the agent's networks.
@@ -525,8 +525,7 @@ class CqlSacAgent(sac_agent.SacAgent):
         step_type,
         reshape_batch_size=batch_size,
         training=False)
-    debug_summaries_dict = {}
-    debug_summaries_dict['q_estimates1'] = tf.reduce_mean(q_estimates1)
+    debug_summaries_dict = {'q_estimates1': tf.reduce_mean(q_estimates1)}
     debug_summaries_dict['q_estimates2'] = tf.reduce_mean(q_estimates2)
 
     # We're supposed to be taking an unweighted sum of Q-values of actions
@@ -661,17 +660,15 @@ class CqlSacAgent(sac_agent.SacAgent):
 
   def _get_cql_alpha(self) -> types.Tensor:
     """Returns CQL alpha."""
-    if self._use_lagrange_cql_alpha:
-      log_cql_alpha = self._log_cql_alpha
-      if self._log_cql_alpha_clipping is not None:
-        log_cql_alpha = tf.clip_by_value(
-            log_cql_alpha,
-            clip_value_min=self._log_cql_alpha_clipping[0],
-            clip_value_max=self._log_cql_alpha_clipping[1])
-      cql_alpha = tf.math.exp(log_cql_alpha)
-      return cql_alpha
-    else:
+    if not self._use_lagrange_cql_alpha:
       return tf.convert_to_tensor(self._cql_alpha)
+    log_cql_alpha = self._log_cql_alpha
+    if self._log_cql_alpha_clipping is not None:
+      log_cql_alpha = tf.clip_by_value(
+          log_cql_alpha,
+          clip_value_min=self._log_cql_alpha_clipping[0],
+          clip_value_max=self._log_cql_alpha_clipping[1])
+    return tf.math.exp(log_cql_alpha)
 
   def _critic_loss_with_optional_entropy_term(
       self,

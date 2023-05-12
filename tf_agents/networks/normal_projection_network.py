@@ -142,11 +142,12 @@ class NormalProjectionNetwork(network.DistributionNetwork):
   def _output_distribution_spec(self, sample_spec, network_name):
     is_multivariate = sample_spec.shape.ndims > 0
     param_properties = tfp.distributions.Normal.parameter_properties()
-    input_param_spec = {  # pylint: disable=g-complex-comprehension
+    input_param_spec = {
         name: tensor_spec.TensorSpec(
             shape=properties.shape_fn(sample_spec.shape),
             dtype=sample_spec.dtype,
-            name=network_name + '_' + name)
+            name=f'{network_name}_{name}',
+        )
         for name, properties in param_properties.items()
     }
 
@@ -178,8 +179,8 @@ class NormalProjectionNetwork(network.DistributionNetwork):
 
     if mask is not None:
       raise NotImplementedError(
-          'NormalProjectionNetwork does not yet implement action masking; got '
-          'mask={}'.format(mask))
+          f'NormalProjectionNetwork does not yet implement action masking; got mask={mask}'
+      )
 
     # outer_rank is needed because the projection is not done on the raw
     # observations so getting the outer rank is hard as there is no spec to

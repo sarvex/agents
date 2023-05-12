@@ -176,7 +176,7 @@ def create_tf_record_dataset(
   record_file_ds = tf.data.Dataset.from_tensor_slices(filenames)
   record_file_ds = record_file_ds.repeat().shuffle(len(filenames))
 
-  spec_path = filenames[0][0] + '.spec'
+  spec_path = f'{filenames[0][0]}.spec'
   record_spec = example_encoding_dataset.parse_encoded_spec_from_file(spec_path)
   decoder = example_encoding.get_example_decoder(record_spec)
 

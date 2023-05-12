@@ -194,9 +194,8 @@ class NeuralLinUCBPolicyTest(parameterized.TestCase, test_utils.TestCase):
           a_inv, self._b_numpy[k].reshape([self._encoding_dim, 1]))
       est_mean_reward = np.matmul(observation_numpy, theta)
       predicted_rewards.append(est_mean_reward)
-    predicted_rewards_array = np.stack(
-        predicted_rewards, axis=-1).reshape(batch_size, self._num_actions)
-    return predicted_rewards_array
+    return np.stack(predicted_rewards, axis=-1).reshape(batch_size,
+                                                        self._num_actions)
 
   def _get_predicted_rewards_from_per_arm_linucb(self, observation_numpy,
                                                  batch_size):
@@ -211,9 +210,8 @@ class NeuralLinUCBPolicyTest(parameterized.TestCase, test_utils.TestCase):
           a_inv, self._b_numpy[0].reshape([self._encoding_dim, 1]))
       est_mean_reward = np.matmul(observation_numpy[:, k, :], theta)
       predicted_rewards.append(est_mean_reward)
-    predicted_rewards_array = np.stack(
-        predicted_rewards, axis=-1).reshape((batch_size, self._num_actions))
-    return predicted_rewards_array
+    return np.stack(predicted_rewards, axis=-1).reshape(
+        (batch_size, self._num_actions))
 
   @test_cases()
   def testBuild(self, batch_size, actions_from_reward_layer):
@@ -447,16 +445,19 @@ class NeuralLinUCBPolicyTest(parameterized.TestCase, test_utils.TestCase):
         dummy_net,
         self._encoding_dim,
         reward_layer,
-        actions_from_reward_layer=tf.constant(
-            actions_from_reward_layer, dtype=tf.bool),
-        cov_matrix=self._a[0:1],
-        data_vector=self._b[0:1],
-        num_samples=self._num_samples_per_arm[0:1],
+        actions_from_reward_layer=tf.constant(actions_from_reward_layer,
+                                              dtype=tf.bool),
+        cov_matrix=self._a[:1],
+        data_vector=self._b[:1],
+        num_samples=self._num_samples_per_arm[:1],
         epsilon_greedy=0.0,
         time_step_spec=time_step_spec,
         accepts_per_arm_features=True,
-        emit_policy_info=('predicted_rewards_mean',
-                          'predicted_rewards_optimistic'))
+        emit_policy_info=(
+            'predicted_rewards_mean',
+            'predicted_rewards_optimistic',
+        ),
+    )
 
     current_time_step = self._per_arm_time_step_batch(
         batch_size=batch_size,
@@ -523,15 +524,16 @@ class NeuralLinUCBPolicyTest(parameterized.TestCase, test_utils.TestCase):
         dummy_net,
         self._encoding_dim,
         reward_layer,
-        actions_from_reward_layer=tf.constant(
-            actions_from_reward_layer, dtype=tf.bool),
-        cov_matrix=self._a[0:1],
-        data_vector=self._b[0:1],
-        num_samples=self._num_samples_per_arm[0:1],
+        actions_from_reward_layer=tf.constant(actions_from_reward_layer,
+                                              dtype=tf.bool),
+        cov_matrix=self._a[:1],
+        data_vector=self._b[:1],
+        num_samples=self._num_samples_per_arm[:1],
         epsilon_greedy=0.0,
         time_step_spec=time_step_spec,
         accepts_per_arm_features=True,
-        emit_policy_info=('predicted_rewards_mean',))
+        emit_policy_info=('predicted_rewards_mean', ),
+    )
     observations = {
         'global': {
             'sport': tf.constant(['snooker', 'chess'])

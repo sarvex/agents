@@ -103,8 +103,8 @@ class PPOUtilsTest(parameterized.TestCase, tf.test.TestCase):
     params = ppo_utils.get_distribution_params(
         distribution, legacy_distribution_network)
 
-    self.assertEqual([set(['logits']), set(['loc', 'scale'])],
-                     [set(d.keys()) for d in params])  # pytype: disable=attribute-error
+    self.assertEqual([{'logits'}, {'loc', 'scale'}],
+                     [set(d.keys()) for d in params])
     self.assertAllEqual([[[2]], [[2], [2]]],
                         [[d[k].shape.as_list() for k in d] for d in params])  # pytype: disable=attribute-error
 

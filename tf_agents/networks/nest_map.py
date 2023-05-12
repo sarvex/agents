@@ -103,8 +103,8 @@ class NestMap(network.Network):
     for layer in flat_nested_layers:
       if not isinstance(layer, tf.keras.layers.Layer):
         raise TypeError(
-            'Expected all layers to be instances of keras Layer, but saw'
-            ': \'{}\''.format(layer))
+            f"Expected all layers to be instances of keras Layer, but saw: \'{layer}\'"
+        )
 
     if input_spec is not None:
       nest_utils.assert_same_structure(

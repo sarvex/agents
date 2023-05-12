@@ -137,7 +137,7 @@ def materialize_saved_model(saved_model_path: Text, checkpoint_path: Text,
     output_path: string. Path where to save the materialized full saved model.
   """
   if tf.io.gfile.exists(output_path):
-    raise ValueError('Output path already exists: %s' % output_path)
+    raise ValueError(f'Output path already exists: {output_path}')
   tf.io.gfile.makedirs(output_path)
   _copy_dir(checkpoint_path, tf.saved_model.VARIABLES_DIRECTORY, output_path)
   _copy_dir(saved_model_path, tf.saved_model.ASSETS_DIRECTORY, output_path)

@@ -74,10 +74,10 @@ class ReverbVariableContainer(object):
       table_info = server_info[table]
       if table_info.max_size != 1:
         raise ValueError(
-            'The max_size of the table {} is {} which different from the '
-            'expected capacity 1.'.format(table, table_info.max_size))
+            f'The max_size of the table {table} is {table_info.max_size} which different from the expected capacity 1.'
+        )
       if not table_info.signature:
-        raise TypeError('Signature is not defined for table {}.'.format(table))
+        raise TypeError(f'Signature is not defined for table {table}.')
       self._dtypes[table] = tf.nest.map_structure(lambda spec: spec.dtype,
                                                   table_info.signature)
     self._tf_client = reverb.TFClient(server_address)
@@ -99,8 +99,9 @@ class ReverbVariableContainer(object):
         type differences.
     """
     if table not in self._dtypes:
-      raise KeyError('Could not find the table {}. Available tables: {}'.format(
-          table, self._dtypes.keys()))
+      raise KeyError(
+          f'Could not find the table {table}. Available tables: {self._dtypes.keys()}'
+      )
 
     # Sequence type check is turned off in Reverb client allowing sequence type
     # differences in the signature. This is required to be able work with

@@ -38,8 +38,10 @@ class TFDeque(object):
     self._spec = tf.TensorSpec(shape, dtype, name='Buffer')
     self._buffer = table.Table(self._spec, capacity=max_len)
 
-    self._head = common.create_variable(
-        initial_value=0, dtype=tf.int32, shape=(), name=name + 'Head')
+    self._head = common.create_variable(initial_value=0,
+                                        dtype=tf.int32,
+                                        shape=(),
+                                        name=f'{name}Head')
 
   @property
   def data(self):
@@ -372,10 +374,12 @@ class AverageReturnMultiMetric(tf_metric.TFMultiMetricStepMetric):
     self._dtype = dtype
     def create_acc(spec):
       return common.create_variable(
-          initial_value=np.zeros((batch_size,) + spec.shape),
-          shape=(batch_size,) + spec.shape,
+          initial_value=np.zeros((batch_size, ) + spec.shape),
+          shape=(batch_size, ) + spec.shape,
           dtype=spec.dtype,
-          name='Accumulator/' + spec.name)
+          name=f'Accumulator/{spec.name}',
+      )
+
     self._return_accumulator = tf.nest.map_structure(create_acc, reward_spec)
     self._reward_spec = reward_spec
     super(AverageReturnMultiMetric, self).__init__(
@@ -424,5 +428,4 @@ def log_metrics(metrics, prefix=''):
 
 def _get_metric_names_from_spec(reward_spec):
   reward_spec_flat = tf.nest.flatten(reward_spec)
-  metric_names_list = tf.nest.map_structure(lambda r: r.name, reward_spec_flat)
-  return metric_names_list
+  return tf.nest.map_structure(lambda r: r.name, reward_spec_flat)

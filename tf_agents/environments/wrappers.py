@@ -153,16 +153,14 @@ class FixedLength(PyEnvironmentBaseWrapper):
 
     time_step = self.current_time_step()
     if time_step.is_last():
-      if self._num_steps < self._fix_length:
-        self._num_steps += 1
-        if self._episode_ended:
-          return time_step
-        else:
-          self._episode_ended = True
-          return time_step._replace(discount=0.0, reward=0. * time_step.reward)
-      else:
+      if self._num_steps >= self._fix_length:
         return self.reset()
 
+      self._num_steps += 1
+      if self._episode_ended:
+        return time_step
+      self._episode_ended = True
+      return time_step._replace(discount=0.0, reward=0. * time_step.reward)
     else:
       time_step = self._env.step(action)
 
@@ -250,8 +248,7 @@ class ActionRepeat(PyEnvironmentBaseWrapper):
     """
     super(ActionRepeat, self).__init__(env)
     if times <= 1:
-      raise ValueError(
-          'Times parameter ({}) should be greater than 1'.format(times))
+      raise ValueError(f'Times parameter ({times}) should be greater than 1')
     self._times = times
 
   def _step(self, action):
@@ -290,19 +287,18 @@ class FlattenActionWrapper(PyEnvironmentBaseWrapper):
     self._original_action_spec = env.action_spec()
     flat_action_spec = tf.nest.flatten(env.action_spec())
 
-    if any([len(s.shape) > 1 for s in flat_action_spec]):
+    if any(len(s.shape) > 1 for s in flat_action_spec):
       raise ValueError('ActionSpec shapes should all have ndim == 1.')
 
-    if flat_dtype is None and any(
-        [s.dtype != flat_action_spec[0].dtype for s in flat_action_spec]):
+    if flat_dtype is None and any(s.dtype != flat_action_spec[0].dtype
+                                  for s in flat_action_spec):
       raise ValueError(
           'All action_spec dtypes must match, or `flat_dtype` should be set.')
 
     # shape or 1 to handle scalar shapes ().
-    shape = sum([(s.shape and s.shape[0]) or 1 for s in flat_action_spec]),
+    shape = (sum((s.shape and s.shape[0]) or 1 for s in flat_action_spec), )
 
-    if all(
-        [isinstance(s, array_spec.BoundedArraySpec) for s in flat_action_spec]):
+    if all(isinstance(s, array_spec.BoundedArraySpec) for s in flat_action_spec):
       minimums = [
           np.broadcast_to(s.minimum, shape=s.shape) for s in flat_action_spec
       ]
@@ -481,16 +477,17 @@ class ActionDiscretizeWrapper(PyEnvironmentBaseWrapper):
     action_spec = tf.nest.flatten(env.action_spec())
     if len(action_spec) != 1:
       raise ValueError(
-          'ActionDiscretizeWrapper only supports environments with a single '
-          'action spec. Got {}'.format(env.action_spec()))
+          f'ActionDiscretizeWrapper only supports environments with a single action spec. Got {env.action_spec()}'
+      )
 
     action_spec = action_spec[0]
     self._original_spec = action_spec
     self._num_actions = np.broadcast_to(num_actions, action_spec.shape)
 
     if action_spec.shape != self._num_actions.shape:
-      raise ValueError('Spec {} and limit shape do not match. Got {}'.format(
-          action_spec, self._num_actions.shape))
+      raise ValueError(
+          f'Spec {action_spec} and limit shape do not match. Got {self._num_actions.shape}'
+      )
 
     self._discrete_spec, self._action_map = self._discretize_spec(
         action_spec, self._num_actions)
@@ -556,8 +553,8 @@ class ActionDiscretizeWrapper(PyEnvironmentBaseWrapper):
     action = np.asarray(action)
     if action.shape != self._discrete_spec.shape:
       raise ValueError(
-          'Received action with incorrect shape. Got {}, expected {}'.format(
-              action.shape, self._discrete_spec.shape))
+          f'Received action with incorrect shape. Got {action.shape}, expected {self._discrete_spec.shape}'
+      )
 
     mapped_action = [action_map[i][a] for i, a in enumerate(action.flatten())]
     return np.reshape(mapped_action, newshape=self._original_spec.shape)
@@ -709,8 +706,7 @@ class FlattenObservationsWrapper(PyEnvironmentBaseWrapper):
 
     # Check that all observations have the same dtype. This dtype will be used
     # to create the flattened ArraySpec.
-    env_dtypes = list(
-        set([obs.dtype for obs in env.observation_spec().values()]))
+    env_dtypes = list({obs.dtype for obs in env.observation_spec().values()})
     if len(env_dtypes) != 1:
       raise ValueError('The observation spec must all have the same dtypes! '
                        'Currently found dtypes: %s' % (env_dtypes))
@@ -796,10 +792,7 @@ class FlattenObservationsWrapper(PyEnvironmentBaseWrapper):
     def np_flatten(x):
       # Check if observations are batch, and if so keep the batch dimension and
       # flatten the all other dimensions into one.
-      if is_batched:
-        return np.reshape(x, [x.shape[0], -1])
-      else:
-        return np.reshape(x, [-1])
+      return np.reshape(x, [x.shape[0], -1]) if is_batched else np.reshape(x, [-1])
 
     # Flatten the individual observations if they are multi-dimensional and then
     # flatten the nested structure.

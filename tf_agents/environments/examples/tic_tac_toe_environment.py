@@ -78,10 +78,7 @@ class TicTacToeEnvironment(py_environment.PyEnvironment):
     if not actions:
       raise RuntimeError('There is no empty space for opponent to play at.')
 
-    if self._rng:
-      i = self._rng.randint(len(actions))
-    else:
-      i = 0
+    i = self._rng.randint(len(actions)) if self._rng else 0
     return actions[i]
 
   def get_state(self) -> TimeStep:

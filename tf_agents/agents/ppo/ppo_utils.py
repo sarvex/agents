@@ -118,13 +118,13 @@ def distribution_from_spec(
   if legacy_distribution_network:
     return distribution_spec.nested_distributions_from_specs(
         spec, new_distribution_params)
-  else:
-    def merge_and_convert(spec, params):
-      return distribution_utils.make_from_parameters(
-          distribution_utils.merge_to_parameters_from_dict(
-              spec.parameters, params))
-    return nest_utils.map_structure_up_to(
-        spec, merge_and_convert, spec, new_distribution_params)
+  def merge_and_convert(spec, params):
+    return distribution_utils.make_from_parameters(
+        distribution_utils.merge_to_parameters_from_dict(
+            spec.parameters, params))
+
+  return nest_utils.map_structure_up_to(
+      spec, merge_and_convert, spec, new_distribution_params)
 
 
 def get_distribution_params(
@@ -194,10 +194,7 @@ def nested_kl_divergence(nested_from_distribution: types.NestedDistribution,
     all_kl_divergences_reduced.append(
         tf.reduce_sum(input_tensor=kl_divergence, axis=reduce_dims))
 
-  # Sum the kl of the leaves.
-  total_kl = tf.add_n(all_kl_divergences_reduced)
-
-  return total_kl
+  return tf.add_n(all_kl_divergences_reduced)
 
 
 def get_metric_observers(metrics):
@@ -217,11 +214,7 @@ def get_learning_rate(optimizer):
   """Gets the current learning rate from an optimizer to be graphed."""
   # Adam optimizers store their learning rate in `_lr`.
   if hasattr(optimizer, '_lr'):
-    if callable(optimizer._lr):  # pylint: disable=protected-access
-      learning_rate = optimizer._lr()  # pylint: disable=protected-access
-    else:
-      learning_rate = optimizer._lr  # pylint: disable=protected-access
-  # Non Adam optimizers store their learning rate in `_learning_rate`.
+    learning_rate = optimizer._lr() if callable(optimizer._lr) else optimizer._lr
   elif hasattr(optimizer, '_learning_rate'):
     if callable(optimizer._learning_rate):  # pylint: disable=protected-access
       learning_rate = optimizer._learning_rate()  # pylint: disable=protected-access

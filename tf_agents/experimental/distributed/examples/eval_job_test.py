@@ -37,7 +37,7 @@ class _NTimesReturnTrue(object):
 
   def __call__(self):
     self._n -= 1
-    return 0 <= self._n
+    return self._n >= 0
 
 
 class EvalJobTest(test_utils.TestCase):

@@ -133,8 +133,7 @@ class DriftingLinearDynamics(nsse.EnvironmentDynamics):
       _raise_batch_shape_error(
           'additive_reward_distribution', reward_batch_shape)
     if additive_reward_distribution.dtype != tf.float32:
-      raise ValueError('Reward  must have dtype float32; got {}'.format(
-          self._reward.dtype))
+      raise ValueError(f'Reward  must have dtype float32; got {self._reward.dtype}')
     self._observation_dim = self._observation_distribution.batch_shape[1]
 
     expected_observation_to_reward_shape = [
@@ -148,9 +147,8 @@ class DriftingLinearDynamics(nsse.EnvironmentDynamics):
     if (observation_to_reward_shape !=
         expected_observation_to_reward_shape):
       raise ValueError(
-          'Observation to reward has {} as expected shape; got {}'.format(
-              expected_observation_to_reward_shape,
-              observation_to_reward_shape))
+          f'Observation to reward has {expected_observation_to_reward_shape} as expected shape; got {observation_to_reward_shape}'
+      )
 
     self._current_observation_to_reward = tf.compat.v2.Variable(
         observation_to_reward_distribution.sample(),
@@ -202,26 +200,22 @@ class DriftingLinearDynamics(nsse.EnvironmentDynamics):
     tf.compat.v1.assign(self._current_additive_reward,
                         self._additive_reward_distribution.sample())
 
-    reward = (tf.matmul(observation, self._current_observation_to_reward) +
-              self._current_additive_reward)
-    return reward
+    return (tf.matmul(observation, self._current_observation_to_reward) +
+            self._current_additive_reward)
 
   @gin.configurable
   def compute_optimal_reward(
       self, observation: types.NestedTensor) -> types.NestedTensor:
     deterministic_reward = tf.matmul(
         observation, self._current_observation_to_reward)
-    optimal_action_reward = tf.reduce_max(deterministic_reward, axis=-1)
-    return optimal_action_reward
+    return tf.reduce_max(deterministic_reward, axis=-1)
 
   @gin.configurable
   def compute_optimal_action(
       self, observation: types.NestedTensor) -> types.NestedTensor:
     deterministic_reward = tf.matmul(
         observation, self._current_observation_to_reward)
-    optimal_action = tf.argmax(
-        deterministic_reward, axis=-1, output_type=tf.int32)
-    return optimal_action
+    return tf.argmax(deterministic_reward, axis=-1, output_type=tf.int32)
 
 
 @gin.configurable

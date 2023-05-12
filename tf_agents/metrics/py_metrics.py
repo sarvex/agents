@@ -75,7 +75,7 @@ class NumpyDeque(numpy_storage.NumpyState):
 
   @property
   def last(self):
-    if not self._len > 0:
+    if self._len <= 0:
       raise RuntimeError('Attempting to access empty NumpyDeque.')
 
     last_index = int((self._start_index + self._len - 1) % self._maxlen)

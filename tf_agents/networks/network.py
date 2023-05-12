@@ -87,8 +87,7 @@ class _NetworkMeta(abc.ABCMeta):
     arg_spec = tf_inspect.getargspec(init)
     if arg_spec.varargs is not None:
       raise RuntimeError(
-          "%s.__init__ function accepts *args.  This is not allowed." %
-          classname)
+          f"{classname}.__init__ function accepts *args.  This is not allowed.")
 
     def _capture_init(self, *args, **kwargs):
       """Captures init args and kwargs and stores them into `_saved_kwargs`."""
@@ -290,9 +289,9 @@ class Network(tf.keras.layers.Layer):
 
     if index is not None:
       if len(self.layers) <= index:
-        raise ValueError("Was asked to retrieve layer at index " + str(index) +
-                         " but model only has " + str(len(self.layers)) +
-                         " layers.")
+        raise ValueError(
+            f"Was asked to retrieve layer at index {str(index)} but model only has {len(self.layers)} layers."
+        )
       else:
         return self.layers[index]
 
@@ -300,7 +299,7 @@ class Network(tf.keras.layers.Layer):
       for layer in self.layers:
         if layer.name == name:
           return layer
-      raise ValueError("No such layer: " + name + ".")
+      raise ValueError(f"No such layer: {name}.")
 
   def summary(self, line_length=None, positions=None, print_fn=None):
     """Prints a string summary of the network.
@@ -646,10 +645,8 @@ def _get_input_outer_ndim(layer: tf.keras.layers.Layer,
   """Calculate or guess the number of batch (outer) ndims in `layer`."""
   if isinstance(layer, tf.keras.layers.RNN):
     raise TypeError(
-        "Saw a tf.keras.layers.RNN layer nested inside e.g. a keras Sequential "
-        "layer.  This is not directly supported.  Please wrap your layer "
-        "inside a `tf_agents.keras_layers.RNNWrapper` or use "
-        "`tf_agents.networks.Sequential`.  Layer: {}".format(layer))
+        f"Saw a tf.keras.layers.RNN layer nested inside e.g. a keras Sequential layer.  This is not directly supported.  Please wrap your layer inside a `tf_agents.keras_layers.RNNWrapper` or use `tf_agents.networks.Sequential`.  Layer: {layer}"
+    )
   if isinstance(layer, tf.keras.layers.TimeDistributed):
     return 1 + _get_input_outer_ndim(layer.layer, input_spec)
   if isinstance(layer, tf.keras.Sequential):
@@ -700,15 +697,16 @@ def get_state_spec(layer: tf.keras.layers.Layer) -> types.NestedTensorSpec:
     return layer.state_spec
 
   if isinstance(layer, tf.keras.layers.RNN):
-    raise TypeError("RNN Layer must be wrapped inside "
-                    "`tf_agents.keras_layers.RNNWrapper`: {}".format(layer))
+    raise TypeError(
+        f"RNN Layer must be wrapped inside `tf_agents.keras_layers.RNNWrapper`: {layer}"
+    )
 
   initial_state = getattr(layer, "get_initial_state", None)
   state_size = getattr(layer, "state_size", None)
   if initial_state is not None and state_size is None:
     raise ValueError(
-        "Layer lacks a `state_size` property.  Unable to extract state "
-        "spec: {}".format(layer))
+        f"Layer lacks a `state_size` property.  Unable to extract state spec: {layer}"
+    )
   state_spec = ()
   if state_size is not None:
     state_spec = tf.nest.map_structure(

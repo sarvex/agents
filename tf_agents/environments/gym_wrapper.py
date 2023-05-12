@@ -79,7 +79,7 @@ def spec_from_gym_space(space: gym.Space,
 
   def nested_spec(spec, child_name):
     """Returns the nested spec with a unique name."""
-    nested_name = name + '/' + child_name if name else child_name
+    nested_name = f'{name}/{child_name}' if name else child_name
     return spec_from_gym_space(spec, dtype_map, simplify_box_bounds,
                                nested_name)
 
@@ -100,10 +100,7 @@ def spec_from_gym_space(space: gym.Space,
   elif isinstance(space, gym.spaces.MultiBinary):
     dtype = dtype_map.get(gym.spaces.MultiBinary, np.int32)
     # Can remove this once we update gym.
-    if isinstance(space.n, int):
-      shape = (space.n,)
-    else:
-      shape = tuple(space.n)
+    shape = (space.n, ) if isinstance(space.n, int) else tuple(space.n)
     return specs.BoundedArraySpec(
         shape=shape, dtype=dtype, minimum=0, maximum=1, name=name)
   elif isinstance(space, gym.spaces.Box):
@@ -129,7 +126,7 @@ def spec_from_gym_space(space: gym.Space,
         name=name)
   elif isinstance(space, gym.spaces.Tuple):
     return tuple(
-        [nested_spec(s, 'tuple_%d' % i) for i, s in enumerate(space.spaces)])
+        nested_spec(s, 'tuple_%d' % i) for i, s in enumerate(space.spaces))
   elif isinstance(space, gym.spaces.Dict):
     return collections.OrderedDict([
         (key, nested_spec(s, key)) for key, s in space.spaces.items()
@@ -239,9 +236,10 @@ class GymWrapper(py_environment.PyEnvironment):
     # Make sure we handle cases where observations are provided as a list.
     flat_obs = nest.flatten_up_to(self._observation_spec, observation)
 
-    matched_observations = []
-    for spec, obs in zip(self._flat_obs_spec, flat_obs):
-      matched_observations.append(np.asarray(obs, dtype=spec.dtype))
+    matched_observations = [
+        np.asarray(obs, dtype=spec.dtype)
+        for spec, obs in zip(self._flat_obs_spec, flat_obs)
+    ]
     return tf.nest.pack_sequence_as(self._observation_spec,
                                     matched_observations)
 
@@ -256,9 +254,7 @@ class GymWrapper(py_environment.PyEnvironment):
 
   def seed(self, seed: types.Seed) -> types.Seed:
     seed_value = self._gym_env.seed(seed)
-    if seed_value is None:
-      return 0
-    return seed_value
+    return 0 if seed_value is None else seed_value
 
   def render(self, mode: Text = 'rgb_array') -> Any:
     return self._gym_env.render(mode, **self._render_kwargs)

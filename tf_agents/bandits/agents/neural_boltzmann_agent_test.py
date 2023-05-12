@@ -85,11 +85,10 @@ class AgentTest(tf.test.TestCase):
 
   def testPolicyWithNeuralBoltzmannGumbel(self):
     reward_net = DummyNet(self._observation_spec, self._action_spec)
-    num_samples_list = []
-    for k in range(3):
-      num_samples_list.append(
-          tf.compat.v2.Variable(
-              tf.zeros([], dtype=tf.int32), name='num_samples_{}'.format(k)))
+    num_samples_list = [
+        tf.compat.v2.Variable(tf.zeros([], dtype=tf.int32),
+                              name=f'num_samples_{k}') for k in range(3)
+    ]
     agent = neural_boltzmann_agent.NeuralBoltzmannAgent(
         self._time_step_spec,
         self._action_spec,

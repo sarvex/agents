@@ -91,7 +91,7 @@ def main(_):
 
     for i in range(num_replicas):
       if num_replicas == 1:
-        file_name = '%s.tfrecord' % FLAGS.env_name
+        file_name = f'{FLAGS.env_name}.tfrecord'
       else:
         file_name = '%s_%d.tfrecord' % (FLAGS.env_name, i)
       dataset_path = os.path.join(root_dir, file_name)

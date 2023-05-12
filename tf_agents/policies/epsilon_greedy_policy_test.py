@@ -98,11 +98,7 @@ class EpsilonGreedyPolicyTest(test_utils.TestCase, parameterized.TestCase):
         self._action_spec,
         self.evaluate(action_step_fn(time_step)).action)
 
-    if tf.executing_eagerly():
-      action_step = action_step_fn
-    else:
-      action_step = action_step_fn()
-
+    action_step = action_step_fn if tf.executing_eagerly() else action_step_fn()
     actions = []
     log_probs = []
 
@@ -160,11 +156,7 @@ class EpsilonGreedyPolicyTest(test_utils.TestCase, parameterized.TestCase):
         self._action_spec,
         self.evaluate(action_step_fn(time_step)).action)
 
-    if tf.executing_eagerly():
-      action_step = action_step_fn
-    else:
-      action_step = action_step_fn()
-
+    action_step = action_step_fn if tf.executing_eagerly() else action_step_fn()
     step = self.evaluate(action_step)
     tf.nest.assert_same_structure(
         info_spec,
@@ -213,11 +205,7 @@ class EpsilonGreedyPolicyTest(test_utils.TestCase, parameterized.TestCase):
         self._action_spec,
         self.evaluate(action_step_fn(time_step)).action)
 
-    if tf.executing_eagerly():
-      action_step = action_step_fn
-    else:
-      action_step = action_step_fn()
-
+    action_step = action_step_fn if tf.executing_eagerly() else action_step_fn()
     step = self.evaluate(action_step)
     tf.nest.assert_same_structure(
         info_spec,

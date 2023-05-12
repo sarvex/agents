@@ -295,7 +295,6 @@ class CategoricalDqnAgent(dqn_agent.DqnAgent):
     if self._n_step_update == 1:
       time_steps, policy_steps, next_time_steps = (
           trajectory.experience_to_transitions(experience, squeeze_time_dim))
-      actions = policy_steps.action
     else:
       # To compute n-step returns, we need the first time steps, the first
       # actions, and the last time steps. Therefore we extract the first and
@@ -305,11 +304,11 @@ class CategoricalDqnAgent(dqn_agent.DqnAgent):
       time_steps, policy_steps, _ = (
           trajectory.experience_to_transitions(
               first_two_steps, squeeze_time_dim))
-      actions = policy_steps.action
       _, _, next_time_steps = (
           trajectory.experience_to_transitions(
               last_two_steps, squeeze_time_dim))
 
+    actions = policy_steps.action
     with tf.name_scope('critic_loss'):
       nest_utils.assert_same_structure(actions, self.action_spec)
       nest_utils.assert_same_structure(time_steps, self.time_step_spec)
@@ -565,30 +564,26 @@ def project_distribution(supports: types.Tensor,
   supports[0].shape.assert_is_compatible_with(target_support.shape)
   target_support.shape.assert_has_rank(1)
   if validate_args:
-    # Assert that supports and weights have the same shapes.
-    validate_deps.append(
+    validate_deps.extend((
         tf.Assert(
             tf.reduce_all(tf.equal(tf.shape(supports), tf.shape(weights))),
-            [supports, weights]))
-    # Assert that elements of supports and target_support have the same shape.
-    validate_deps.append(
+            [supports, weights],
+        ),
         tf.Assert(
             tf.reduce_all(
                 tf.equal(tf.shape(supports)[1], tf.shape(target_support))),
-            [supports, target_support]))
-    # Assert that target_support has a single dimension.
-    validate_deps.append(
+            [supports, target_support],
+        ),
         tf.Assert(
-            tf.equal(tf.size(tf.shape(target_support)), 1), [target_support]))
-    # Assert that the target_support is monotonically increasing.
-    validate_deps.append(
-        tf.Assert(tf.reduce_all(target_support_deltas > 0), [target_support]))
-    # Assert that the values in target_support are equally spaced.
-    validate_deps.append(
+            tf.equal(tf.size(tf.shape(target_support)), 1),
+            [target_support],
+        ),
+        tf.Assert(tf.reduce_all(target_support_deltas > 0), [target_support]),
         tf.Assert(
             tf.reduce_all(tf.equal(target_support_deltas, delta_z)),
-            [target_support]))
-
+            [target_support],
+        ),
+    ))
   with tf.control_dependencies(validate_deps):
     # Ex: `v_min, v_max = 4, 8`.
     v_min, v_max = target_support[0], target_support[-1]

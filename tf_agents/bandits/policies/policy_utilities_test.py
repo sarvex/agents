@@ -102,7 +102,7 @@ class PolicyUtilitiesTest(test_utils.TestCase, parameterized.TestCase):
     input_tensor = tf.fill(dims, value=_GREEDY)
     # Overwrite some values with UNIFORM.
     mask_idx = (range(dims[0])[1:dims[0]:2])
-    mask = [[True if idx in mask_idx else False] for idx in range(dims[0])]
+    mask = [[idx in mask_idx] for idx in range(dims[0])]
     expected = [[_UNIFORM if mask_value[0]  else _GREEDY]
                 for mask_value in mask]
     result = policy_utilities.bandit_policy_uniform_mask(input_tensor, mask)

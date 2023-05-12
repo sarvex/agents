@@ -67,11 +67,10 @@ class CategoricalProjectionNetwork(network.DistributionNetwork):
         name=name)
 
     if not tensor_spec.is_bounded(sample_spec):
-      raise ValueError(
-          'sample_spec must be bounded. Got: %s.' % type(sample_spec))
+      raise ValueError(f'sample_spec must be bounded. Got: {type(sample_spec)}.')
 
     if not tensor_spec.is_discrete(sample_spec):
-      raise ValueError('sample_spec must be discrete. Got: %s.' % sample_spec)
+      raise ValueError(f'sample_spec must be discrete. Got: {sample_spec}.')
 
     self._sample_spec = sample_spec
     self._output_shape = output_shape
@@ -86,10 +85,9 @@ class CategoricalProjectionNetwork(network.DistributionNetwork):
   def _output_distribution_spec(self, output_shape, sample_spec, network_name):
     input_param_spec = {
         'logits':
-            tensor_spec.TensorSpec(
-                shape=output_shape,
-                dtype=tf.float32,
-                name=network_name + '_logits')
+        tensor_spec.TensorSpec(shape=output_shape,
+                               dtype=tf.float32,
+                               name=f'{network_name}_logits')
     }
 
     return distribution_spec.DistributionSpec(

@@ -77,11 +77,9 @@ class BatchedPyEnvironment(py_environment.PyEnvironment):
       ValueError: If the action or observation specs don't match.
     """
     if not isinstance(envs, (list, tuple)):
-      raise ValueError("envs must be a list or tuple.  Got: %s" % envs)
-    batched_envs = [(i, env) for i, env in enumerate(envs) if env.batched]
-    if batched_envs:
-      raise ValueError(
-          "Some of the envs are already batched: %s" % batched_envs)
+      raise ValueError(f"envs must be a list or tuple.  Got: {envs}")
+    if batched_envs := [(i, env) for i, env in enumerate(envs) if env.batched]:
+      raise ValueError(f"Some of the envs are already batched: {batched_envs}")
     self._parallel_execution = multithreading
     self._envs = envs
     self._num_envs = len(envs)
@@ -90,12 +88,12 @@ class BatchedPyEnvironment(py_environment.PyEnvironment):
     self._time_step_spec = self._envs[0].time_step_spec()
     if any(env.action_spec() != self._action_spec for env in self._envs):
       raise ValueError(
-          "All environments must have the same action spec.  Saw: %s" %
-          [env.action_spec() for env in self._envs])
+          f"All environments must have the same action spec.  Saw: {[env.action_spec() for env in self._envs]}"
+      )
     if any(env.time_step_spec() != self._time_step_spec for env in self._envs):
       raise ValueError(
-          "All environments must have the same time_step_spec.  Saw: %s" %
-          [env.time_step_spec() for env in self._envs])
+          f"All environments must have the same time_step_spec.  Saw: {[env.time_step_spec() for env in self._envs]}"
+      )
     # Create a multiprocessing threadpool for execution.
     if multithreading:
       self._pool = mp_threads.Pool(self._num_envs)
@@ -131,9 +129,8 @@ class BatchedPyEnvironment(py_environment.PyEnvironment):
   def get_info(self) -> types.NestedArray:
     if self._num_envs == 1:
       return nest_utils.batch_nested_array(self._envs[0].get_info())
-    else:
-      infos = self._execute(lambda env: env.get_info(), self._envs)
-      return nest_utils.stack_nested_arrays(infos)
+    infos = self._execute(lambda env: env.get_info(), self._envs)
+    return nest_utils.stack_nested_arrays(infos)
 
   def _reset(self):
     """Reset all environments and combine the resulting observation.
@@ -143,9 +140,8 @@ class BatchedPyEnvironment(py_environment.PyEnvironment):
     """
     if self._num_envs == 1:
       return nest_utils.batch_nested_array(self._envs[0].reset())
-    else:
-      time_steps = self._execute(lambda env: env.reset(), self._envs)
-      return nest_utils.stack_nested_arrays(time_steps)
+    time_steps = self._execute(lambda env: env.reset(), self._envs)
+    return nest_utils.stack_nested_arrays(time_steps)
 
   def _step(self, actions):
     """Forward a batch of actions to the wrapped environments.
@@ -194,8 +190,7 @@ class BatchedPyEnvironment(py_environment.PyEnvironment):
 def unstack_actions(batched_actions: types.NestedArray) -> types.NestedArray:
   """Returns a list of actions from potentially nested batch of actions."""
   flattened_actions = tf.nest.flatten(batched_actions)
-  unstacked_actions = [
+  return [
       tf.nest.pack_sequence_as(batched_actions, actions)
       for actions in zip(*flattened_actions)
   ]
-  return unstacked_actions

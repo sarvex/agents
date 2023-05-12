@@ -119,8 +119,9 @@ class WheelPyEnvironment(bandit_py_environment.BanditPyEnvironment):
 
     # The first action should have higher mean reward that the other actions.
     if self._mu_base[0] != max(self._mu_base):
-      raise ValueError('The first action in mu_base should have the highest '
-                       'reward; got {}'.format(self._mu_base))
+      raise ValueError(
+          f'The first action in mu_base should have the highest reward; got {self._mu_base}'
+      )
 
     action_spec = array_spec.BoundedArraySpec(
         shape=(),
@@ -165,8 +166,7 @@ class WheelPyEnvironment(bandit_py_environment.BanditPyEnvironment):
     reward_outside = ((1.0 - is_norm_below_delta) *
                       r_outside[np.arange(self._batch_size), action])
 
-    reward_final = reward_inside + reward_outside
-    return reward_final
+    return reward_inside + reward_outside
 
   def _observe(self) -> types.NestedArray:
     """Returns 2-dim samples falling in the unit circle."""

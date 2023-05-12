@@ -31,9 +31,9 @@ TFRECORD_OBSERVER_PREFIX = ('tf_agents.experimental.examples.cql_sac.' +
 
 class FileUtilsTest(test_utils.TestCase):
 
-  @mock.patch('%s.__init__' % TFRECORD_OBSERVER_PREFIX)
-  @mock.patch('%s.__call__' % TFRECORD_OBSERVER_PREFIX)
-  @mock.patch('%s.close' % TFRECORD_OBSERVER_PREFIX)
+  @mock.patch(f'{TFRECORD_OBSERVER_PREFIX}.__init__')
+  @mock.patch(f'{TFRECORD_OBSERVER_PREFIX}.__call__')
+  @mock.patch(f'{TFRECORD_OBSERVER_PREFIX}.close')
   def test_write_transitions_to_tfrecord(self, mock_close, mock_call,
                                          mock_init):
     mock_init.return_value = None
@@ -128,9 +128,9 @@ class FileUtilsTest(test_utils.TestCase):
       self.assertAllEqual(ps_actual.action, ps_expected.action)
       self.assertAllEqual(ps_actual.info, ps_expected.info)
 
-  @mock.patch('%s.__init__' % TFRECORD_OBSERVER_PREFIX)
-  @mock.patch('%s.__call__' % TFRECORD_OBSERVER_PREFIX)
-  @mock.patch('%s.close' % TFRECORD_OBSERVER_PREFIX)
+  @mock.patch(f'{TFRECORD_OBSERVER_PREFIX}.__init__')
+  @mock.patch(f'{TFRECORD_OBSERVER_PREFIX}.__call__')
+  @mock.patch(f'{TFRECORD_OBSERVER_PREFIX}.close')
   def test_write_trajectories_to_tfrecord(self, mock_close, mock_call,
                                           mock_init):
     mock_init.return_value = None

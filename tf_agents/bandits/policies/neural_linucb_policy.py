@@ -133,8 +133,9 @@ class NeuralLinUCBPolicy(tf_policy.TFPolicy):
     self._encoding_dim = encoding_dim
 
     if accepts_per_arm_features and reward_layer.units != 1:
-      raise ValueError('The output dimension of the reward layer must be 1, got'
-                       ' {}'.format(reward_layer.units))
+      raise ValueError(
+          f'The output dimension of the reward layer must be 1, got {reward_layer.units}'
+      )
 
     if not isinstance(cov_matrix, (list, tuple)):
       raise ValueError('cov_matrix must be a list of matrices (Tensors).')
@@ -155,15 +156,13 @@ class NeuralLinUCBPolicy(tf_policy.TFPolicy):
     self._distributed_use_reward_layer = distributed_use_reward_layer
 
     if len(cov_matrix) != len(data_vector):
-      raise ValueError('The size of list cov_matrix must match the size of '
-                       'list data_vector. Got {} for cov_matrix and {} '
-                       'for data_vector'.format(
-                           len(self._cov_matrix), len((data_vector))))
+      raise ValueError(
+          f'The size of list cov_matrix must match the size of list data_vector. Got {len(self._cov_matrix)} for cov_matrix and {len(data_vector)} for data_vector'
+      )
     if len(num_samples) != len(cov_matrix):
-      raise ValueError('The size of num_samples must match the size of '
-                       'list cov_matrix. Got {} for num_samples and {} '
-                       'for cov_matrix'.format(
-                           len(self._num_samples), len((cov_matrix))))
+      raise ValueError(
+          f'The size of num_samples must match the size of list cov_matrix. Got {len(self._num_samples)} for num_samples and {len(cov_matrix)} for cov_matrix'
+      )
 
     self._accepts_per_arm_features = accepts_per_arm_features
     if observation_and_action_constraint_splitter is not None:
@@ -180,16 +179,14 @@ class NeuralLinUCBPolicy(tf_policy.TFPolicy):
       self._num_models = self._num_actions
     cov_matrix_dim = tf.compat.dimension_value(cov_matrix[0].shape[0])
     if self._encoding_dim != cov_matrix_dim:
-      raise ValueError('The dimension of matrix `cov_matrix` must match '
-                       'encoding dimension {}.'
-                       'Got {} for `cov_matrix`.'.format(
-                           self._encoding_dim, cov_matrix_dim))
+      raise ValueError(
+          f'The dimension of matrix `cov_matrix` must match encoding dimension {self._encoding_dim}.Got {cov_matrix_dim} for `cov_matrix`.'
+      )
     data_vector_dim = tf.compat.dimension_value(data_vector[0].shape[0])
     if self._encoding_dim != data_vector_dim:
-      raise ValueError('The dimension of vector `data_vector` must match '
-                       'encoding  dimension {}. '
-                       'Got {} for `data_vector`.'.format(
-                           self._encoding_dim, data_vector_dim))
+      raise ValueError(
+          f'The dimension of vector `data_vector` must match encoding  dimension {self._encoding_dim}. Got {data_vector_dim} for `data_vector`.'
+      )
     action_spec = tensor_spec.BoundedTensorSpec(
         shape=(),
         dtype=tf.int32,

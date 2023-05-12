@@ -50,19 +50,19 @@ def get_distribution_strategy(distribution_strategy="default",
   distribution_strategy = distribution_strategy.lower()
   if distribution_strategy == "off":
     if num_gpus > 1:
-      raise ValueError("When {} GPUs are specified, distribution_strategy "
-                       "cannot be set to 'off'.".format(num_gpus))
+      raise ValueError(
+          f"When {num_gpus} GPUs are specified, distribution_strategy cannot be set to 'off'."
+      )
     return None
 
   if (distribution_strategy == "one_device" or
       (distribution_strategy == "default" and num_gpus <= 1)):
     if num_gpus == 0:
       return tf.distribute.OneDeviceStrategy("device:CPU:0")
-    else:
-      if num_gpus > 1:
-        raise ValueError("`OneDeviceStrategy` can not be used for more than "
-                         "one device.")
-      return tf.distribute.OneDeviceStrategy("device:GPU:0")
+    if num_gpus > 1:
+      raise ValueError("`OneDeviceStrategy` can not be used for more than "
+                       "one device.")
+    return tf.distribute.OneDeviceStrategy("device:GPU:0")
 
   if distribution_strategy in ("mirrored", "default"):
     if num_gpus == 0:
@@ -79,12 +79,7 @@ def get_distribution_strategy(distribution_strategy="default",
 
 
 def strategy_scope_context(strategy):
-  if strategy:
-    strategy_scope = strategy.scope()
-  else:
-    strategy_scope = DummyContextManager()
-
-  return strategy_scope
+  return strategy.scope() if strategy else DummyContextManager()
 
 
 class DummyContextManager(object):

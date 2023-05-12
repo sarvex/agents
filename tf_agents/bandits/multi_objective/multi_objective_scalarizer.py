@@ -56,9 +56,8 @@ def _validate_scalarization_parameter_shape(
     if param_shape.rank != 1 and not multi_objectives.shape.is_compatible_with(
         param_shape):
       raise ValueError(
-          'The shape of multi_objectives: {} does not match the shape of '
-          'scalarization parameter: {}, which is {}'.format(
-              multi_objectives.shape, param_name, param_shape))
+          f'The shape of multi_objectives: {multi_objectives.shape} does not match the shape of scalarization parameter: {param_name}, which is {param_shape}'
+      )
 
 
 # TODO(b/202447704): Update to use public Protocol when available.
@@ -109,13 +108,12 @@ class Scalarizer(tf.Module):
     """
     if not isinstance(num_of_objectives, int):
       raise ValueError(
-          'Scalarizer should be initialized with an integer representing the '
-          'number of objectives, but the type of the input is {}.'.format(
-              type(num_of_objectives)))
+          f'Scalarizer should be initialized with an integer representing the number of objectives, but the type of the input is {type(num_of_objectives)}.'
+      )
     if num_of_objectives < 2:
       raise ValueError(
-          'Scalarizer should be used with at least two objectives, but only {}'
-          ' are given.'.format(num_of_objectives))
+          f'Scalarizer should be used with at least two objectives, but only {num_of_objectives} are given.'
+      )
     self._num_of_objectives = num_of_objectives
 
   def __call__(self, multi_objectives: tf.Tensor) -> tf.Tensor:
@@ -132,12 +130,13 @@ class Scalarizer(tf.Module):
         `multi_objectives.shape.dims[1] != self._num_of_objectives`.
     """
     if multi_objectives.shape.rank != 2:
-      raise ValueError('The rank of the input should be 2, but is {}'.format(
-          multi_objectives.shape.rank))
+      raise ValueError(
+          f'The rank of the input should be 2, but is {multi_objectives.shape.rank}'
+      )
     if multi_objectives.shape.dims[1] != self._num_of_objectives:
       raise ValueError(
-          'The number of input objectives should be {}, but is {}.'.format(
-              self._num_of_objectives, multi_objectives.shape.dims[1]))
+          f'The number of input objectives should be {self._num_of_objectives}, but is {multi_objectives.shape.dims[1]}.'
+      )
     return self._scalarize(self._transform(multi_objectives))
 
   def _validate_scalarization_parameters(self, params: Dict[str, tf.Tensor]):
@@ -156,15 +155,12 @@ class Scalarizer(tf.Module):
     for param_name, param in params.items():
       if param.shape.rank != 2:
         raise ValueError(
-            'Scalarization parameter: {} should be a rank-2 tensor with shape '
-            '[batch_size, num_of_objectives], but found to be: {}'.format(
-                param_name, param))
+            f'Scalarization parameter: {param_name} should be a rank-2 tensor with shape [batch_size, num_of_objectives], but found to be: {param}'
+        )
       elif param.shape.dims[-1] != self._num_of_objectives:
         raise ValueError(
-            'The number of objectives in scalarization parameter: {} should '
-            'be {}, but found to be {}.'.format(param_name,
-                                                self._num_of_objectives,
-                                                param.shape.dims[-1]))
+            f'The number of objectives in scalarization parameter: {param_name} should be {self._num_of_objectives}, but found to be {param.shape.dims[-1]}.'
+        )
 
   # Identity transform. Subclasses can override.
   def _transform(self, multiobjectives: tf.Tensor) -> tf.Tensor:
@@ -258,8 +254,8 @@ class ChebyshevScalarizer(Scalarizer):
     """
     if len(weights) != len(reference_point):
       raise ValueError(
-          'weights has {} elements but reference_point has {}.'.format(
-              len(weights), len(reference_point)))
+          f'weights has {len(weights)} elements but reference_point has {len(reference_point)}.'
+      )
     self._weights = copy.deepcopy(weights)
     self._reference_point = reference_point
     super(ChebyshevScalarizer, self).__init__(len(self._weights))
@@ -343,19 +339,19 @@ class HyperVolumeScalarizer(Scalarizer):
         `HyperVolumeScalarizer.ALMOST_ZERO`.
       ValueError: if `len(transform_params) != len(self._direction)`.
     """
-    if any([x < 0 for x in direction]):
+    if any(x < 0 for x in direction):
       raise ValueError(
-          'direction should be in the positive orthant, but has negative '
-          'coordinates: [{}].'.format(', '.join(map(str, direction))))
-    length = np.sqrt(sum([x * x for x in direction]))
+          f"direction should be in the positive orthant, but has negative coordinates: [{', '.join(map(str, direction))}]."
+      )
+    length = np.sqrt(sum(x * x for x in direction))
     if length < self.ALMOST_ZERO:
       raise ValueError(
           'direction found to be a nearly-zero vector, but should not be.')
     self._direction = [x / length for x in direction]
     if len(transform_params) != len(self._direction):
       raise ValueError(
-          'direction has {} elements but transform_params has {}.'.format(
-              len(direction), len(transform_params)))
+          f'direction has {len(direction)} elements but transform_params has {len(transform_params)}.'
+      )
     self._slopes, self._offsets = zip(
         *[(p.slope, p.offset) for p in transform_params])
 
@@ -422,5 +418,5 @@ class HyperVolumeScalarizer(Scalarizer):
         self._offsets = param
       else:
         raise ValueError(
-            'All transform_params keys should be {} or {}, but one key is not:'
-            ' {}'.format(self.SLOPE_KEY, self.OFFSET_KEY, key))
+            f'All transform_params keys should be {self.SLOPE_KEY} or {self.OFFSET_KEY}, but one key is not: {key}'
+        )

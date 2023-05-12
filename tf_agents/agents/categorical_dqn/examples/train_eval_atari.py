@@ -411,7 +411,7 @@ class TrainEval(object):
   def run(self):
     """Execute the train/eval loop."""
     with tf.compat.v1.Session(
-        config=tf.compat.v1.ConfigProto(allow_soft_placement=True)) as sess:
+          config=tf.compat.v1.ConfigProto(allow_soft_placement=True)) as sess:
       # Initialize the graph.
       self._initialize_graph(sess)
 
@@ -444,8 +444,7 @@ class TrainEval(object):
 
           py_metric.run_summaries(self._eval_metrics + [self._iteration_metric])
           if self._eval_metrics_callback:
-            results = dict((metric.name, metric.result())
-                           for metric in self._eval_metrics)
+            results = {metric.name: metric.result() for metric in self._eval_metrics}
             self._eval_metrics_callback(results, global_step_val)
           for metric in self._eval_metrics:
             log_metric(metric, prefix='Eval/Metrics')
@@ -538,11 +537,7 @@ class TrainEval(object):
 
   def _collect_step(self, time_step, metric_observers, train=False):
     """Run a single step (or 2 steps on life loss) in the environment."""
-    if train:
-      policy = self._collect_policy
-    else:
-      policy = self._eval_policy
-
+    policy = self._collect_policy if train else self._eval_policy
     with self._action_timer:
       action_step = policy.action(time_step)
     with self._step_timer:
@@ -597,28 +592,30 @@ class TrainEval(object):
 
   def _maybe_log(self, sess, global_step_val, total_loss):
     """Log some stats if global_step_val is a multiple of log_interval."""
-    if global_step_val % self._log_interval == 0:
-      logging.info('step = %d, loss = %f', global_step_val, total_loss.loss)
-      logging.info('%s', 'action_time = {}'.format(self._action_timer.value()))
-      logging.info('%s', 'step_time = {}'.format(self._step_timer.value()))
-      logging.info('%s', 'observer_time = {}'.format(
-          self._observer_timer.value()))
-      steps_per_sec = ((global_step_val - self._timed_at_step) /
-                       (self._collect_timer.value()
-                        + self._train_timer.value()))
-      sess.run(self._steps_per_second_summary,
-               feed_dict={self._steps_per_second_ph: steps_per_sec})
-      logging.info('%.3f steps/sec', steps_per_sec)
-      logging.info('%s', 'collect_time = {}, train_time = {}'.format(
-          self._collect_timer.value(), self._train_timer.value()))
-      for metric in self._train_metrics:
-        log_metric(metric, prefix='Train/Metrics')
-      self._timed_at_step = global_step_val
-      self._collect_timer.reset()
-      self._train_timer.reset()
-      self._action_timer.reset()
-      self._step_timer.reset()
-      self._observer_timer.reset()
+    if global_step_val % self._log_interval != 0:
+      return
+    logging.info('step = %d, loss = %f', global_step_val, total_loss.loss)
+    logging.info('%s', f'action_time = {self._action_timer.value()}')
+    logging.info('%s', f'step_time = {self._step_timer.value()}')
+    logging.info('%s', f'observer_time = {self._observer_timer.value()}')
+    steps_per_sec = ((global_step_val - self._timed_at_step) /
+                     (self._collect_timer.value()
+                      + self._train_timer.value()))
+    sess.run(self._steps_per_second_summary,
+             feed_dict={self._steps_per_second_ph: steps_per_sec})
+    logging.info('%.3f steps/sec', steps_per_sec)
+    logging.info(
+        '%s',
+        f'collect_time = {self._collect_timer.value()}, train_time = {self._train_timer.value()}',
+    )
+    for metric in self._train_metrics:
+      log_metric(metric, prefix='Train/Metrics')
+    self._timed_at_step = global_step_val
+    self._collect_timer.reset()
+    self._train_timer.reset()
+    self._action_timer.reset()
+    self._step_timer.reset()
+    self._observer_timer.reset()
 
 
 def get_run_args():

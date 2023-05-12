@@ -64,12 +64,13 @@ class DummyCategoricalNet(network.Network):
     bias_initializer = tf.keras.initializers.Ones()
 
     # Store custom layers that can be serialized through the Checkpointable API.
-    self._dummy_layers = []
-    self._dummy_layers.append(
+    self._dummy_layers = [
         tf.keras.layers.Dense(
             num_actions * num_atoms,
             kernel_initializer=kernel_initializer,
-            bias_initializer=bias_initializer))
+            bias_initializer=bias_initializer,
+        )
+    ]
 
   @property
   def num_atoms(self):
@@ -113,8 +114,7 @@ class DummyCategoricalQRnnNetwork(q_rnn_network.QRnnNetwork):
                num_atoms=51,
                **kwargs):
     if not isinstance(action_spec, tensor_spec.BoundedTensorSpec):
-      raise TypeError('action_spec must be a BoundedTensorSpec. Got: %s' % (
-          action_spec,))
+      raise TypeError(f'action_spec must be a BoundedTensorSpec. Got: {action_spec}')
 
     self._num_actions = action_spec.maximum - action_spec.minimum + 1
     self._num_atoms = num_atoms

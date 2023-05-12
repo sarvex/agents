@@ -86,11 +86,10 @@ class TanhNormalProjectionNetwork(network.DistributionNetwork):
         'loc': sample_spec.shape,
         'scale_diag': sample_spec.shape
     }
-    input_param_spec = {  # pylint: disable=g-complex-comprehension
-        name: tensor_spec.TensorSpec(
-            shape=shape,
-            dtype=sample_spec.dtype,
-            name=network_name + '_' + name)
+    input_param_spec = {
+        name: tensor_spec.TensorSpec(shape=shape,
+                                     dtype=sample_spec.dtype,
+                                     name=f'{network_name}_{name}')
         for name, shape in input_param_shapes.items()
     }
 
@@ -113,8 +112,8 @@ class TanhNormalProjectionNetwork(network.DistributionNetwork):
 
     if mask is not None:
       raise NotImplementedError(
-          'TanhNormalProjectionNetwork does not yet implement action masking; '
-          'got mask={}'.format(mask))
+          f'TanhNormalProjectionNetwork does not yet implement action masking; got mask={mask}'
+      )
 
     # outer_rank is needed because the projection is not done on the raw
     # observations so getting the outer rank is hard as there is no spec to

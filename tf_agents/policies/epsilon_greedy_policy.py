@@ -105,10 +105,7 @@ class EpsilonGreedyPolicy(tf_policy.TFPolicy):
     return self._greedy_policy.variables()
 
   def _get_epsilon(self):
-    if callable(self._epsilon):
-      return self._epsilon()
-    else:
-      return self._epsilon
+    return self._epsilon() if callable(self._epsilon) else self._epsilon
 
   def _action(self, time_step, policy_state, seed):
     seed_stream = tfp.util.SeedStream(seed=seed, salt='epsilon_greedy')
@@ -175,9 +172,9 @@ class EpsilonGreedyPolicy(tf_policy.TFPolicy):
                 f: getattr(greedy_action.info, f)
                 for f in self.info_fields_to_inherit_from_greedy
             })
+    elif random_action.info:
+      raise ValueError('Incompatible info field')
     else:
-      if random_action.info:
-        raise ValueError('Incompatible info field')
       info = ()
 
     # The state of the epsilon greedy policy is the state of the underlying

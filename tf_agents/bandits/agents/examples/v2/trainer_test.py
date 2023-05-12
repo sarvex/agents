@@ -145,7 +145,7 @@ class TrainerTest(tf.test.TestCase, parameterized.TestCase):
           training_loops=training_loops,
           steps_per_loop=steps_per_loop)
       latest_checkpoint = tf.train.latest_checkpoint(root_dir)
-      expected_checkpoint_regex = '.*-{}'.format(i * training_loops)
+      expected_checkpoint_regex = f'.*-{i * training_loops}'
       self.assertRegex(latest_checkpoint, expected_checkpoint_regex)
 
   @parameterized.named_parameters(

@@ -49,9 +49,7 @@ class LinearNormalReward(object):
       A scalar value: the reward.
     """
     mu = np.dot(x, self.theta)
-    if enable_noise:
-      return np.random.normal(mu, self.sigma)
-    return mu
+    return np.random.normal(mu, self.sigma) if enable_noise else mu
 
 
 @gin.configurable
@@ -131,9 +129,8 @@ def structured_linear_reward_fn_generator(context_dim, num_actions, variance,
   Returns:
     A list of noisy linear functions that are related to each other.
   """
-  theta_list = []
   theta_previous = np.random.rand(context_dim)
-  theta_list.append(theta_previous)
+  theta_list = [theta_previous]
   for _ in range(1, num_actions):
     drift = np.random.rand(context_dim)
     theta_new = theta_previous + drift_coefficient * drift
@@ -162,11 +159,7 @@ class LinearNormalMultipleRewards(object):
     self.thetas = thetas
 
   def __call__(self, x, enable_noise=False):
-    # `x` is of shape [`batch_size`, 'context_dim']
-    # `theta` is of shape [`context_dim`, 'num_rewards']
-    # The result `predicted_rewards` has shape [`batch_size`, `num_rewards`]
-    predicted_rewards = np.matmul(x, self.thetas)
-    return predicted_rewards
+    return np.matmul(x, self.thetas)
 
 
 @gin.configurable
@@ -194,10 +187,7 @@ def random_linear_multiple_reward_fn_generator(
 
   def _gen_multiple_rewards_for_action():
     params = np.random.rand(context_dim, num_rewards)
-    if squeeze_dims:
-      return np.squeeze(params)
-    else:
-      return params
+    return np.squeeze(params) if squeeze_dims else params
 
   return linear_multiple_reward_fn_generator(
       [_gen_multiple_rewards_for_action() for _ in range(num_actions)])
@@ -222,9 +212,7 @@ def compute_optimal_reward(observation, per_action_reward_fns,
       [per_action_reward_fns[a](observation, enable_noise)
        for a in range(num_actions)],
       axis=-1)
-  # `rewards` should be of shape [`batch_size`, `num_actions`].
-  optimal_action_reward = np.max(rewards, axis=-1)
-  return optimal_action_reward
+  return np.max(rewards, axis=-1)
 
 
 @gin.configurable
@@ -261,8 +249,7 @@ def compute_optimal_action(observation,
   ],
                      axis=-1)
 
-  optimal_action = np.argmax(rewards, axis=-1)
-  return optimal_action
+  return np.argmax(rewards, axis=-1)
 
 
 @gin.configurable

@@ -88,8 +88,7 @@ class PiecewiseStationaryDynamics(nsse.EnvironmentDynamics):
           'additive_reward_distribution', reward_batch_shape)
 
     if additive_reward_distribution.dtype != tf.float32:
-      raise ValueError('Reward  must have dtype float32; got {}'.format(
-          self._reward.dtype))
+      raise ValueError(f'Reward  must have dtype float32; got {self._reward.dtype}')
 
     expected_observation_to_reward_shape = [
         tf.compat.dimension_value(
@@ -104,9 +103,8 @@ class PiecewiseStationaryDynamics(nsse.EnvironmentDynamics):
     if (observation_to_reward_shape !=
         expected_observation_to_reward_shape):
       raise ValueError(
-          'Observation to reward has {} as expected shape; got {}'.format(
-              observation_to_reward_shape,
-              expected_observation_to_reward_shape))
+          f'Observation to reward has {observation_to_reward_shape} as expected shape; got {expected_observation_to_reward_shape}'
+      )
 
     self._current_interval = tf.compat.v2.Variable(
         tf.cast(interval_distribution.sample(), dtype=tf.int64),
@@ -188,17 +186,14 @@ class PiecewiseStationaryDynamics(nsse.EnvironmentDynamics):
       self, observation: types.NestedTensor) -> types.NestedTensor:
     deterministic_reward = tf.matmul(
         observation, self._current_observation_to_reward)
-    optimal_action_reward = tf.reduce_max(deterministic_reward, axis=-1)
-    return optimal_action_reward
+    return tf.reduce_max(deterministic_reward, axis=-1)
 
   @gin.configurable
   def compute_optimal_action(
       self, observation: types.NestedTensor) -> types.NestedTensor:
     deterministic_reward = tf.matmul(
         observation, self._current_observation_to_reward)
-    optimal_action = tf.argmax(
-        deterministic_reward, axis=-1, output_type=tf.int32)
-    return optimal_action
+    return tf.argmax(deterministic_reward, axis=-1, output_type=tf.int32)
 
 
 @gin.configurable

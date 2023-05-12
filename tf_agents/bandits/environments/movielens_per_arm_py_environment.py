@@ -148,13 +148,10 @@ class MovieLensPerArmPyEnvironment(bandit_py_environment.BanditPyEnvironment):
     self._previous_movie_indices = self._current_movie_indices
     self._current_movie_indices = sampled_movie_indices
 
-    batched_observations = {
-        GLOBAL_KEY:
-            self._u_hat[sampled_user_indices],
-        PER_ARM_KEY:
-            current_movies,
+    return {
+        GLOBAL_KEY: self._u_hat[sampled_user_indices],
+        PER_ARM_KEY: current_movies,
     }
-    return batched_observations
 
   def _apply_action(self, action):
     chosen_arm_indices = self._current_movie_indices[range(self._batch_size),
@@ -163,10 +160,9 @@ class MovieLensPerArmPyEnvironment(bandit_py_environment.BanditPyEnvironment):
                                        chosen_arm_indices]
 
   def _rewards_for_all_actions(self):
-    rewards_matrix = self._approx_ratings_matrix[
+    return self._approx_ratings_matrix[
         np.expand_dims(self._previous_user_indices, axis=-1),
-        self._previous_movie_indices]
-    return rewards_matrix
+        self._previous_movie_indices, ]
 
   def compute_optimal_action(self):
     return np.argmax(self._rewards_for_all_actions(), axis=-1)

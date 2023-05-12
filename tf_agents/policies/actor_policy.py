@@ -104,8 +104,9 @@ class ActorPolicy(tf_policy.TFPolicy):
     action_spec = tensor_spec.from_spec(action_spec)
 
     if not isinstance(actor_network, network.Network):
-      raise ValueError('actor_network must be a network.Network. Found '
-                       '{}.'.format(type(actor_network)))
+      raise ValueError(
+          f'actor_network must be a network.Network. Found {type(actor_network)}.'
+      )
 
     # Create variables regardless of if we use the output spec.
     actor_output_spec = actor_network.create_variables(
@@ -123,13 +124,12 @@ class ActorPolicy(tf_policy.TFPolicy):
     self._observation_normalizer = observation_normalizer
     self._training = training
 
-    if observation_and_action_constraint_splitter is not None:
-      if len(tf.nest.flatten(action_spec)) > 1 or (
-          not tensor_spec.is_discrete(action_spec)):
-        raise NotImplementedError(
-            'Action constraints for ActorPolicy are currently only supported '
-            'for a single spec of discrete actions. Got action_spec {}'.format(
-                action_spec))
+    if observation_and_action_constraint_splitter is not None and (
+        len(tf.nest.flatten(action_spec)) > 1 or
+        (not tensor_spec.is_discrete(action_spec))):
+      raise NotImplementedError(
+          f'Action constraints for ActorPolicy are currently only supported for a single spec of discrete actions. Got action_spec {action_spec}'
+      )
 
     if not policy_state_spec:
       policy_state_spec = actor_network.state_spec

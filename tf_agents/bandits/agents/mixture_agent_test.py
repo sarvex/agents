@@ -48,8 +48,7 @@ class WeightRotatingMixtureAgent(mixture_agent.MixtureAgent):
 
   def _update_mixture_distribution(self, experience):
     weight_values = tf.identity(self._mixture_distribution.probs)
-    new_values = tf.concat(
-        [weight_values[1:], weight_values[0:1]], 0)
+    new_values = tf.concat([weight_values[1:], weight_values[:1]], 0)
     self._mixture_distribution.probs.assign(new_values)
 
   def _initialize(self):
@@ -159,14 +158,14 @@ class MixtureAgentTest(test_utils.TestCase, parameterized.TestCase):
     time_step_spec = time_step.time_step_spec(observation_spec)
     action_spec = tensor_spec.BoundedTensorSpec(
         dtype=tf.int32, shape=(), minimum=0, maximum=num_actions - 1)
-    agents = []
-    for _ in range(num_agents):
-      agents.append(
-          lin_ucb_agent.LinearUCBAgent(
-              time_step_spec,
-              action_spec,
-              emit_policy_info=(
-                  policy_utilities.InfoFields.PREDICTED_REWARDS_MEAN,)))
+    agents = [
+        lin_ucb_agent.LinearUCBAgent(
+            time_step_spec,
+            action_spec,
+            emit_policy_info=(
+                policy_utilities.InfoFields.PREDICTED_REWARDS_MEAN, ),
+        ) for _ in range(num_agents)
+    ]
     dist = tfd.Categorical(
         probs=tf.Variable(tf.range(num_agents, dtype=tf.float32)))
     mixed_agent = WeightRotatingMixtureAgent(dist, agents)

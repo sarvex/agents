@@ -100,14 +100,14 @@ class PYEnvironmentMock(py_environment.PyEnvironment):
     return specs.ArraySpec([], np.int64, name='observation')
 
   def render(self, mode):
-    assert isinstance(mode, (str, Text)), 'Got: {}'.format(type(mode))
+    assert isinstance(mode, (str, Text)), f'Got: {type(mode)}'
     if mode == 'rgb_array':
       return np.ones((4, 4, 3), dtype=np.uint8)
     elif mode == 'human':
       # Many environments often do not return anything on human mode.
       return None
     else:
-      raise ValueError('Unknown mode: {}'.format(mode))
+      raise ValueError(f'Unknown mode: {mode}')
 
 
 class PYEnvironmentMockNestedRewards(py_environment.PyEnvironment):

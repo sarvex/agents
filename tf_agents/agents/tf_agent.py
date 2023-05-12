@@ -188,8 +188,8 @@ class TFAgent(tf.Module):
     common.tf_agents_gauge.get_cell(str(type(self))).set(True)
     if not isinstance(time_step_spec, ts.TimeStep):
       raise TypeError(
-          "The `time_step_spec` must be an instance of `TimeStep`, but is `{}`."
-          .format(type(time_step_spec)))
+          f"The `time_step_spec` must be an instance of `TimeStep`, but is `{type(time_step_spec)}`."
+      )
 
     if num_outer_dims not in [1, 2]:
       raise ValueError("num_outer_dims must be in [1, 2].")
@@ -263,12 +263,9 @@ class TFAgent(tf.Module):
     """
     if self._enable_functions and getattr(self, "_initialize_fn", None) is None:
       raise RuntimeError(
-          "Cannot find _initialize_fn.  Did %s.__init__ call super?"
-          % type(self).__name__)
-    if self._enable_functions:
-      return self._initialize_fn()
-    else:
-      return self._initialize()
+          f"Cannot find _initialize_fn.  Did {type(self).__name__}.__init__ call super?"
+      )
+    return self._initialize_fn() if self._enable_functions else self._initialize()
 
   def preprocess_sequence(self,
                           experience: types.NestedTensor) -> types.NestedTensor:
@@ -285,12 +282,8 @@ class TFAgent(tf.Module):
     Returns:
       A post processed `Trajectory` with the same shape as the input.
     """
-    if self._enable_functions:
-      preprocessed_sequence = self._preprocess_sequence_fn(experience)
-    else:
-      preprocessed_sequence = self._preprocess_sequence(experience)
-
-    return preprocessed_sequence
+    return (self._preprocess_sequence_fn(experience)
+            if self._enable_functions else self._preprocess_sequence(experience))
 
   def train(self,
             experience: types.NestedTensor,
@@ -324,8 +317,8 @@ class TFAgent(tf.Module):
     """
     if self._enable_functions and getattr(self, "_train_fn", None) is None:
       raise RuntimeError(
-          "Cannot find _train_fn.  Did %s.__init__ call super?"
-          % type(self).__name__)
+          f"Cannot find _train_fn.  Did {type(self).__name__}.__init__ call super?"
+      )
 
     if self._enable_functions:
       loss_info = self._train_fn(
@@ -334,8 +327,7 @@ class TFAgent(tf.Module):
       loss_info = self._train(experience=experience, weights=weights, **kwargs)
 
     if not isinstance(loss_info, LossInfo):
-      raise TypeError(
-          "loss_info is not a subclass of LossInfo: {}".format(loss_info))
+      raise TypeError(f"loss_info is not a subclass of LossInfo: {loss_info}")
     return loss_info
 
   def loss(self,
@@ -374,8 +366,8 @@ class TFAgent(tf.Module):
     """
     if self._enable_functions and getattr(self, "_loss_fn", None) is None:
       raise RuntimeError(
-          "Cannot find _loss_fn.  Did %s.__init__ call super?"
-          % type(self).__name__)
+          f"Cannot find _loss_fn.  Did {type(self).__name__}.__init__ call super?"
+      )
 
     if self._enable_functions:
       loss_info = self._loss_fn(
@@ -385,8 +377,7 @@ class TFAgent(tf.Module):
           experience=experience, weights=weights, training=training, **kwargs)
 
     if not isinstance(loss_info, LossInfo):
-      raise TypeError(
-          "loss_info is not a subclass of LossInfo: {}".format(loss_info))
+      raise TypeError(f"loss_info is not a subclass of LossInfo: {loss_info}")
     return loss_info
 
   def _apply_loss(self, aggregated_losses, variables_to_train, tape, optimizer):

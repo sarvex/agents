@@ -15,6 +15,7 @@
 
 """Define TF Agents version information."""
 
+
 # We follow Semantic Versioning (https://semver.org/)
 _MAJOR_VERSION = '0'
 _MINOR_VERSION = '12'
@@ -34,5 +35,5 @@ __version__ = '.'.join([
     _MINOR_VERSION,
     _PATCH_VERSION,
 ])
-__dev_version__ = '{}.{}'.format(__version__, _DEV_SUFFIX)
-__rel_version__ = '{}{}'.format(__version__, _REL_SUFFIX)
+__dev_version__ = f'{__version__}.{_DEV_SUFFIX}'
+__rel_version__ = f'{__version__}{_REL_SUFFIX}'

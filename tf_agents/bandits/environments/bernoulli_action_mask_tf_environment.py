@@ -127,9 +127,7 @@ class BernoulliActionMaskTFEnvironment(bandit_tf_environment.BanditTFEnvironment
   @common.function
   def _apply_action(self, action):
     self._check_action_with_mask(action)
-    # pylint: disable=protected-access
-    reward = self.original_environment._apply_action(action)
-    return reward
+    return self.original_environment._apply_action(action)
 
   @common.function
   def _observe(self):

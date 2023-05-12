@@ -60,8 +60,8 @@ class BaseConstraint(tf.Module):
     super(BaseConstraint, self).__init__(name=name)
     if not isinstance(time_step_spec, ts.TimeStep):
       raise ValueError(
-          'The `time_step_spec` must be an instance of `TimeStep`, but is `{}`.'
-          .format(type(time_step_spec)))
+          f'The `time_step_spec` must be an instance of `TimeStep`, but is `{type(time_step_spec)}`.'
+      )
 
     self._time_step_spec = time_step_spec
     self._action_spec = action_spec

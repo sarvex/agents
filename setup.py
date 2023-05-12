@@ -69,9 +69,7 @@ class TestLoader(unittest.TestLoader):
     if not fnmatch.fnmatch(path, pattern):
       return False
     module_name = full_path.replace('/', '.').rstrip('.py')
-    if any(module_name.endswith(x) for x in self._exclude_list):
-      return False
-    return True
+    return not any(module_name.endswith(x) for x in self._exclude_list)
 
 
 def load_test_list(filename):
@@ -124,7 +122,7 @@ class Test(TestCommandBase):
       external_test_failures = []
 
       for test in run_separately:
-        filename = 'tf_agents/%s.py' % test.replace('.', '/')
+        filename = f"tf_agents/{test.replace('.', '/')}.py"
         try:
           subprocess.check_call([sys.executable, filename])
         except subprocess.CalledProcessError as e:
@@ -148,10 +146,7 @@ class Test(TestCommandBase):
       stderr.writeln(final_output)
       stderr.writeln(header)
 
-      if result.wasSuccessful() and not external_test_failures:
-        return 0
-      else:
-        return 1
+      return 0 if result.wasSuccessful() and not external_test_failures else 1
 
     # Run inside absl.app.run to ensure flags parsing is done.
     from tf_agents.system import system_multiprocessing as multiprocessing  # pylint: disable=g-import-not-at-top
@@ -186,11 +181,7 @@ def get_required_packages():
 
 def add_additional_packages(required_packages):
   """Adds additional required packages."""
-  if FLAGS.release:
-    tfp_version = TFP_VERSION
-  else:
-    tfp_version = TFP_NIGHTLY
-
+  tfp_version = TFP_VERSION if FLAGS.release else TFP_NIGHTLY
   if FLAGS.tfp_version:
     tfp_version = FLAGS.tfp_version
   required_packages.append(tfp_version)
@@ -198,7 +189,7 @@ def add_additional_packages(required_packages):
 
 def get_test_packages():
   """Returns list of packages needed when testing."""
-  test_packages = [
+  return [
       'ale-py',
       'atari-py',  # TODO(b/200012648) contains ALE/Tetris ROM for unit test.
       'mock >= 2.0.0',
@@ -206,12 +197,10 @@ def get_test_packages():
       'pybullet',
       'scipy == 1.1.0',
   ]
-  return test_packages
 
 
 def get_reverb_packages():
   """Returns list of required packages if using reverb."""
-  reverb_packages = []
   if FLAGS.release:
     tf_version = TENSORFLOW_VERSION
     reverb_version = REVERB_VERSION
@@ -225,9 +214,7 @@ def get_reverb_packages():
   if FLAGS.reverb_version:
     reverb_version = FLAGS.reverb_version
 
-  reverb_packages.append(reverb_version)
-  reverb_packages.append(tf_version)
-  return reverb_packages
+  return [reverb_version, tf_version]
 
 
 def get_version():

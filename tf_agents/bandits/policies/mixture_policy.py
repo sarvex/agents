@@ -91,7 +91,7 @@ class MixturePolicy(tf_policy.TFPolicy):
         name=name)
 
   def _variables(self):
-    variables = sum([p.variables() for p in self._policies], [])
+    variables = sum((p.variables() for p in self._policies), [])
     variables.extend(self._mixture_distribution.variables)
     return variables
 

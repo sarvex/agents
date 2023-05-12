@@ -112,7 +112,7 @@ def compute_summaries(metrics,
   if tf_summaries:
     py_metric.run_summaries(metrics)
   if log:
-    log_metrics(metrics, prefix='Step = {}'.format(global_step))
+    log_metrics(metrics, prefix=f'Step = {global_step}')
   if callback is not None:
     callback(results, global_step)
   return results

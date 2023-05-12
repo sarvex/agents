@@ -29,18 +29,18 @@ from tensorflow.python.framework import test_util  # pylint: disable=g-direct-te
 
 def _prepare_alphas(action_spec):
   num_actions = action_spec.maximum - action_spec.minimum + 1
-  alphas = [tf.compat.v2.Variable(
-      tf.ones([], dtype=tf.float32), name='alpha_{}'.format(k)) for k in range(
-          num_actions)]
-  return alphas
+  return [
+      tf.compat.v2.Variable(tf.ones([], dtype=tf.float32), name=f'alpha_{k}')
+      for k in range(num_actions)
+  ]
 
 
 def _prepare_betas(action_spec):
   num_actions = action_spec.maximum - action_spec.minimum + 1
-  betas = [tf.compat.v2.Variable(
-      tf.ones([], dtype=tf.float32), name='beta_{}'.format(k)) for k in range(
-          num_actions)]
-  return betas
+  return [
+      tf.compat.v2.Variable(tf.ones([], dtype=tf.float32), name=f'beta_{k}')
+      for k in range(num_actions)
+  ]
 
 
 @test_util.run_all_in_graph_and_eager_modes
@@ -87,12 +87,14 @@ class BernoulliThompsonSamplingPolicyTest(test_utils.TestCase):
   def testWrongAlphaParamsSize(self):
     tf.compat.v1.set_random_seed(1)
     action_spec = tensor_spec.BoundedTensorSpec((), tf.int32, 10, 20)
-    alphas = [tf.compat.v2.Variable(
-        tf.zeros([], dtype=tf.float32),
-        name='alpha_{}'.format(k)) for k in range(5)]
-    betas = [tf.compat.v2.Variable(
-        tf.zeros([], dtype=tf.float32),
-        name='beta_{}'.format(k)) for k in range(5)]
+    alphas = [
+        tf.compat.v2.Variable(tf.zeros([], dtype=tf.float32), name=f'alpha_{k}')
+        for k in range(5)
+    ]
+    betas = [
+        tf.compat.v2.Variable(tf.zeros([], dtype=tf.float32), name=f'beta_{k}')
+        for k in range(5)
+    ]
     with self.assertRaisesRegex(
         ValueError,
         r'The size of alpha parameters is expected to be equal to the number'
@@ -106,12 +108,14 @@ class BernoulliThompsonSamplingPolicyTest(test_utils.TestCase):
   def testWrongBetaParamsSize(self):
     tf.compat.v1.set_random_seed(1)
     action_spec = tensor_spec.BoundedTensorSpec((), tf.int32, 10, 20)
-    alphas = [tf.compat.v2.Variable(
-        tf.zeros([], dtype=tf.float32),
-        name='alpha_{}'.format(k)) for k in range(11)]
-    betas = [tf.compat.v2.Variable(
-        tf.zeros([], dtype=tf.float32),
-        name='beta_{}'.format(k)) for k in range(5)]
+    alphas = [
+        tf.compat.v2.Variable(tf.zeros([], dtype=tf.float32), name=f'alpha_{k}')
+        for k in range(11)
+    ]
+    betas = [
+        tf.compat.v2.Variable(tf.zeros([], dtype=tf.float32), name=f'beta_{k}')
+        for k in range(5)
+    ]
     with self.assertRaisesRegex(
         ValueError,
         r'The size of alpha parameters is expected to be equal to the size of'

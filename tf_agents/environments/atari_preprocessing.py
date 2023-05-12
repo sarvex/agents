@@ -82,11 +82,10 @@ class AtariPreprocessing(gym_core.Wrapper):
         dtype=np.uint8)
 
     if frame_skip <= 0:
-      raise ValueError(
-          'Frame skip should be strictly positive, got {}'.format(frame_skip))
+      raise ValueError(f'Frame skip should be strictly positive, got {frame_skip}')
     if screen_size <= 0:
-      raise ValueError('Target screen size should be strictly positive, got {}'
-                       .format(screen_size))
+      raise ValueError(
+          f'Target screen size should be strictly positive, got {screen_size}')
 
     self.terminal_on_life_loss = terminal_on_life_loss
     self.frame_skip = frame_skip

@@ -99,8 +99,8 @@ class ClassificationBanditEnvironment(bte.BanditTFEnvironment):
     event_shape = reward_distribution.event_shape
     if len(event_shape) != 2:
       raise ValueError(
-          'reward_distribution must have event shape of rank 2; '
-          'got event shape {}'.format(event_shape))
+          f'reward_distribution must have event shape of rank 2; got event shape {event_shape}'
+      )
     _, num_actions = event_shape
     action_spec = tensor_spec.BoundedTensorSpec(shape=(),
                                                 dtype=tf.int32,
@@ -111,8 +111,8 @@ class ClassificationBanditEnvironment(bte.BanditTFEnvironment):
 
     # Computing `time_step_spec`.
     if len(output_shapes) != 2:
-      raise ValueError('Dataset must have exactly two outputs; got {}'.format(
-          len(output_shapes)))
+      raise ValueError(
+          f'Dataset must have exactly two outputs; got {len(output_shapes)}')
     context_shape = output_shapes[0]
     context_dtype, lbl_dtype = tf.compat.v1.data.get_output_types(dataset)
     if label_dtype_cast:

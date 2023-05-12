@@ -593,13 +593,11 @@ class RunStatsWrapperTest(test_utils.TestCase):
     time_step = env.reset()
     self.assertEqual(1, env.resets)
 
-    resets = 1
-    for _ in range(0, 4):
+    for resets, _ in enumerate(range(0, 4), start=1):
       while not time_step.is_last():
         self.assertEqual(resets, env.resets)
         time_step = env.step(np.array(1, dtype=np.int32))
       time_step = env.step(np.array(1, dtype=np.int32))
-      resets += 1
 
 
 class ActionDiscretizeWrapper(test_utils.TestCase):
@@ -1094,13 +1092,8 @@ class FlattenObservationsWrapper(parameterized.TestCase):
 
   def _get_expected_shape(self, observation, observations_to_keep):
     """Gets the expected shape of a flattened observation nest."""
-    # The expected shape is the sum of observation lengths in the observation
-    # spec.  For a multi-dimensional observation, it is flattened, thus the
-    # length is the product of its shape, i.e. Two arrays ([3, 3], [2, 3])
-    # result in a len-9 and len-6 observation, with total length of 15.
-    expected_shape = 0
-    for obs in observations_to_keep:
-      expected_shape += np.prod(observation[obs].shape)
+    expected_shape = sum(
+        np.prod(observation[obs].shape) for obs in observations_to_keep)
     return (expected_shape,)
 
 

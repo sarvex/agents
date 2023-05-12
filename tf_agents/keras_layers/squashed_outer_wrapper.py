@@ -80,9 +80,8 @@ class SquashedOuterWrapper(tf.keras.layers.Layer):
     """
     if getattr(wrapped, 'get_initial_state', None) is not None:
       raise ValueError(
-          '`wrapped` has method `get_initial_state`, which means its inputs '
-          'will include separate state tensors.  This is not supported by '
-          '`SquashedOuterWrapper`.  wrapped: {}'.format(wrapped))
+          f'`wrapped` has method `get_initial_state`, which means its inputs will include separate state tensors.  This is not supported by `SquashedOuterWrapper`.  wrapped: {wrapped}'
+      )
     self._inner_rank = inner_rank
     self._wrapped = wrapped
     super(SquashedOuterWrapper, self).__init__(**kwargs)
@@ -98,8 +97,7 @@ class SquashedOuterWrapper(tf.keras.layers.Layer):
   def build(self, input_shape):
     input_shape = tf.TensorShape(input_shape)
     if input_shape.rank is None:
-      raise ValueError(
-          'inputs must have known rank; input shape: {}'.format(input_shape))
+      raise ValueError(f'inputs must have known rank; input shape: {input_shape}')
     batch_shape = input_shape[:-self.inner_rank]
     inner_shape = input_shape[-self.inner_rank:]
     if batch_shape.is_fully_defined():
@@ -112,8 +110,7 @@ class SquashedOuterWrapper(tf.keras.layers.Layer):
   def call(self, inputs, training=False):
     static_rank = inputs.shape.rank
     if static_rank is None:
-      raise ValueError(
-          'inputs must have known rank; inputs: {}'.format(inputs))
+      raise ValueError(f'inputs must have known rank; inputs: {inputs}')
     squash_dims = static_rank - self.inner_rank
     bs = utils.BatchSquash(squash_dims)
     squashed_inputs = bs.flatten(inputs)
@@ -128,9 +125,7 @@ class SquashedOuterWrapper(tf.keras.layers.Layer):
             'config': self.wrapped.get_config()
         }
     }
-    base_config = dict(super(SquashedOuterWrapper, self).get_config())
-    base_config.update(config)
-    return base_config
+    return dict(super(SquashedOuterWrapper, self).get_config()) | config
 
   @classmethod
   def from_config(cls, config, custom_objects=None):
@@ -141,8 +136,7 @@ class SquashedOuterWrapper(tf.keras.layers.Layer):
   def compute_output_shape(self, input_shape):
     input_shape = tf.TensorShape(input_shape)
     if input_shape.rank is None:
-      raise ValueError(
-          'inputs must have known rank; input shape: {}'.format(input_shape))
+      raise ValueError(f'inputs must have known rank; input shape: {input_shape}')
     batch_shape = input_shape[:-self.inner_rank]
     inner_shape = input_shape[-self.inner_rank:]
     if batch_shape.is_fully_defined():
@@ -154,9 +148,7 @@ class SquashedOuterWrapper(tf.keras.layers.Layer):
 
   @property
   def trainable_weights(self):
-    if not self.trainable:
-      return []
-    return self.wrapped.trainable_weights
+    return [] if not self.trainable else self.wrapped.trainable_weights
 
   @property
   def non_trainable_weights(self):

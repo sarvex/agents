@@ -510,11 +510,10 @@ class AgentTest(tf.test.TestCase):
       return
     reward_net = DummyNet(self._observation_spec, self._action_spec)
     optimizer = tf.compat.v1.train.GradientDescentOptimizer(learning_rate=0.1)
-    num_samples_list = []
-    for k in range(3):
-      num_samples_list.append(
-          tf.compat.v2.Variable(
-              tf.zeros([], dtype=tf.int64), name='num_samples_{}'.format(k)))
+    num_samples_list = [
+        tf.compat.v2.Variable(tf.zeros([], dtype=tf.int64),
+                              name=f'num_samples_{k}') for k in range(3)
+    ]
     agent = greedy_agent.GreedyRewardPredictionAgent(
         self._time_step_spec,
         self._action_spec,

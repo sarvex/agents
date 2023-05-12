@@ -222,9 +222,8 @@ class DqnAgent(tf_agent.TFAgent):
 
     if epsilon_greedy is not None and boltzmann_temperature is not None:
       raise ValueError(
-          'Configured both epsilon_greedy value {} and temperature {}, '
-          'however only one of them can be used for exploration.'.format(
-              epsilon_greedy, boltzmann_temperature))
+          f'Configured both epsilon_greedy value {epsilon_greedy} and temperature {boltzmann_temperature}, however only one of them can be used for exploration.'
+      )
 
     self._observation_and_action_constraint_splitter = (
         observation_and_action_constraint_splitter)
@@ -261,8 +260,8 @@ class DqnAgent(tf_agent.TFAgent):
 
     if q_network.state_spec and n_step_update != 1:
       raise NotImplementedError(
-          'DqnAgent does not currently support n-step updates with stateful '
-          'networks (i.e., RNNs), but n_step_update = {}'.format(n_step_update))
+          f'DqnAgent does not currently support n-step updates with stateful networks (i.e., RNNs), but n_step_update = {n_step_update}'
+      )
 
     train_sequence_length = (
         n_step_update + 1 if not q_network.state_spec else None)
@@ -296,8 +295,8 @@ class DqnAgent(tf_agent.TFAgent):
     # TODO(oars): Get DQN working with more than one dim in the actions.
     if len(flat_action_spec) > 1 or flat_action_spec[0].shape.rank > 0:
       raise ValueError(
-          'Only scalar actions are supported now, but action spec is: {}'
-          .format(action_spec))
+          f'Only scalar actions are supported now, but action spec is: {action_spec}'
+      )
 
     spec = flat_action_spec[0]
 

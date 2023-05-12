@@ -69,13 +69,10 @@ class TicTacToeEnvironmentTest(test_utils.TestCase):
 
   def test_opponent_play_random(self):
     self.env = TicTacToeEnvironment(rng=np.random.RandomState(0))
-    s = set()
     states = np.array([[0, 1, 2], [0, 0, 0], [0, 0, 0]])
     legal_actions = self.env._legal_actions(states)
 
-    # Make sure that each legal action has been played.
-    for _ in range(100):
-      s.add(self.env._opponent_play(states))
+    s = {self.env._opponent_play(states) for _ in range(100)}
     self.assertEqual(set(legal_actions), s)
 
   def test_step_win(self):

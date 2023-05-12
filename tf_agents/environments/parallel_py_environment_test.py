@@ -127,8 +127,9 @@ class ParallelPyEnvironmentTest(tf.test.TestCase):
     self.assertLessEqual(
         end_time - start_time,
         10.0,
-        msg=('Expected all processes to start together, '
-             'got {} wait time').format(end_time - start_time))
+        msg=
+        f'Expected all processes to start together, got {end_time - start_time} wait time',
+    )
     env.close()
 
   def test_blocking_start_processes_one_after_another(self):
@@ -146,8 +147,9 @@ class ParallelPyEnvironmentTest(tf.test.TestCase):
     self.assertGreater(
         end_time - start_time,
         10,
-        msg=('Expected all processes to start one '
-             'after another, got {} wait time').format(end_time - start_time))
+        msg=
+        f'Expected all processes to start one after another, got {end_time - start_time} wait time',
+    )
     env.close()
 
   def test_unstack_actions(self):

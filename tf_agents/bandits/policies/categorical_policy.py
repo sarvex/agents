@@ -35,8 +35,7 @@ tfd = tfp.distributions
 
 def _validate_weights(weights: types.Tensor):
   if len(weights.shape) != 1:
-    raise ValueError(
-        'Expected a 1D `Tensor` of weights; got {}.'.format(weights))
+    raise ValueError(f'Expected a 1D `Tensor` of weights; got {weights}.')
 
 
 class CategoricalPolicy(tf_policy.TFPolicy):
@@ -91,9 +90,8 @@ class CategoricalPolicy(tf_policy.TFPolicy):
     self._inverse_temperature = inverse_temperature
     if action_spec.maximum + 1 != tf.compat.dimension_value(weights.shape[0]):
       raise ValueError(
-          'Number of actions ({}) does not match weights dimension ({}).'
-          .format(action_spec.maximum + 1,
-                  tf.compat.dimension_value(weights.shape[0])))
+          f'Number of actions ({action_spec.maximum + 1}) does not match weights dimension ({tf.compat.dimension_value(weights.shape[0])}).'
+      )
     super(CategoricalPolicy, self).__init__(
         time_step_spec=time_step_spec,
         action_spec=action_spec,

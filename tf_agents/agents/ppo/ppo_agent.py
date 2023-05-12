@@ -100,14 +100,14 @@ PPOLossInfo = collections.namedtuple('PPOLossInfo', (
 
 def _normalize_advantages(advantages, axes=(0, 1), variance_epsilon=1e-8):
   adv_mean, adv_var = tf.nn.moments(advantages, axes=axes, keepdims=True)
-  normalized_advantages = tf.nn.batch_normalization(
+  return tf.nn.batch_normalization(
       advantages,
       adv_mean,
       adv_var,
       offset=None,
       scale=None,
-      variance_epsilon=variance_epsilon)
-  return normalized_advantages
+      variance_epsilon=variance_epsilon,
+  )
 
 
 @gin.configurable
@@ -658,15 +658,14 @@ class PPOAgent(tf_agent.TFAgent):
       tf.compat.v2.summary.histogram(
           name='advantages', data=advantages, step=self.train_step_counter)
 
-    # Return TD-Lambda returns if both use_td_lambda_return and use_gae.
     if self._use_td_lambda_return:
-      if not self._use_gae:
-        logging.warning('use_td_lambda_return was True, but use_gae was '
-                        'False. Using Monte Carlo return.')
-      else:
+      if self._use_gae:
         returns = tf.add(
             advantages, value_preds[:, :-1], name='td_lambda_returns')
 
+      else:
+        logging.warning('use_td_lambda_return was True, but use_gae was '
+                        'False. Using Monte Carlo return.')
     return returns, advantages
 
   def _preprocess(self, experience):

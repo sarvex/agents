@@ -210,12 +210,11 @@ class PolicySaver(object):
       ValueError: If `batch_size` is not either `None` or a python integer > 0.
     """
     if not isinstance(policy, tf_policy.TFPolicy):
-      raise TypeError('policy is not a TFPolicy.  Saw: %s' % type(policy))
+      raise TypeError(f'policy is not a TFPolicy.  Saw: {type(policy)}')
     if (batch_size is not None and
         (not isinstance(batch_size, int) or batch_size < 1)):
       raise ValueError(
-          'Expected batch_size == None or python int > 0, saw: %s' %
-          (batch_size,))
+          f'Expected batch_size == None or python int > 0, saw: {batch_size}')
 
     self._use_nest_path_signatures = use_nest_path_signatures
 
@@ -241,8 +240,7 @@ class PolicySaver(object):
           aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,
           shape=())
     elif not isinstance(train_step, tf.Variable):
-      raise ValueError('train_step must be a TensorFlow variable: %s' %
-                       train_step)
+      raise ValueError(f'train_step must be a TensorFlow variable: {train_step}')
 
     # We will need the train step for the Checkpoint object.
     self._train_step = train_step
@@ -251,9 +249,9 @@ class PolicySaver(object):
     self._metadata = metadata or {}
     for key, value in self._metadata.items():
       if not isinstance(key, str):
-        raise TypeError('Keys of metadata must be strings: %s' % key)
+        raise TypeError(f'Keys of metadata must be strings: {key}')
       if not isinstance(value, tf.Variable):
-        raise TypeError('Values of metadata must be tf.Variable: %s' % value)
+        raise TypeError(f'Values of metadata must be tf.Variable: {value}')
     saved_policy.metadata = self._metadata
 
     if batch_size is None:
@@ -440,9 +438,7 @@ class PolicySaver(object):
     # objects (once it's available).  For now, we have no other way of tracking
     # objects like Tables, Vocabulary files, etc.
     try:
-      saved_policy._all_assets = {
-          name: ref
-          for name, ref in policy._unconditional_checkpoint_dependencies}  # pylint: disable=protected-access
+      saved_policy._all_assets = dict(policy._unconditional_checkpoint_dependencies)
     except AttributeError as e:
       if '_self_unconditional' in str(e):
         logging.warning(
@@ -555,8 +551,7 @@ class PolicySaver(object):
         default a batch dimension is added to the input_spec.
     """
     if getattr(self._policy, name, None) is not None:
-      raise ValueError('Policy already has an attribute registered with: %s' %
-                       name)
+      raise ValueError(f'Policy already has an attribute registered with: {name}')
 
     batched_spec = tf.nest.map_structure(lambda s: add_batch_dim(s, outer_dims),
                                          input_spec)
@@ -585,8 +580,7 @@ class PolicySaver(object):
         module. Note variables are automatically captured.
     """
     if getattr(self._policy, name, None) is not None:
-      raise ValueError('Policy already has an attribute registered with: %s' %
-                       name)
+      raise ValueError(f'Policy already has an attribute registered with: {name}')
 
     setattr(self._policy, name, fn)
 
@@ -595,7 +589,7 @@ class PolicySaver(object):
       setattr(self._policy, name + '__variables_%d' % i, concrete_fn.variables)
 
     if assets:
-      setattr(self._policy, name + '__assets', assets)
+      setattr(self._policy, f'{name}__assets', assets)
 
   def save(self,
            export_dir: Text,
@@ -609,7 +603,7 @@ class PolicySaver(object):
     tf.compat.v2.saved_model.save(
         self._policy, export_dir, signatures=self._signatures, options=options)
 
-    temp_spec_file_name = '{}_temp'.format(POLICY_SPECS_PBTXT)
+    temp_spec_file_name = f'{POLICY_SPECS_PBTXT}_temp'
     temp_spec_output_path = os.path.join(export_dir, temp_spec_file_name)
     specs = {
         'collect_data_spec': self._policy.collect_data_spec,

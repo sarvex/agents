@@ -70,7 +70,7 @@ def _infer_state_dtype(explicit_dtype, state):
     inferred_dtypes = [element.dtype for element in tf.nest.flatten(state)]
     if not inferred_dtypes:
       raise ValueError("Unable to infer dtype from empty state.")
-    all_same = all([x == inferred_dtypes[0] for x in inferred_dtypes])
+    all_same = all(x == inferred_dtypes[0] for x in inferred_dtypes)
     if not all_same:
       raise ValueError(
           "State has tensors of different inferred_dtypes. Unable to infer a "
@@ -99,8 +99,7 @@ def _best_effort_input_batch_size(flat_input):
     if shape.rank is None:
       continue
     if shape.rank < 2:
-      raise ValueError(
-          "Expected input tensor %s to have rank at least 2" % input_)
+      raise ValueError(f"Expected input tensor {input_} to have rank at least 2")
     batch_size = shape.dims[1].value
     if batch_size is not None:
       return batch_size
@@ -154,11 +153,11 @@ class DynamicUnroll(tf.keras.layers.Layer):
         `state_size` property.
     """
     if getattr(cell, "get_initial_state", None) is None:
-      raise TypeError("cell lacks get_initial_state method: %s" % cell)
+      raise TypeError(f"cell lacks get_initial_state method: {cell}")
     if getattr(cell, "output_size", None) is None:
-      raise TypeError("cell lacks output_size property: %s" % cell)
+      raise TypeError(f"cell lacks output_size property: {cell}")
     if getattr(cell, "state_size", None) is None:
-      raise TypeError("cell lacks state_size property: %s" % cell)
+      raise TypeError(f"cell lacks state_size property: {cell}")
     self.cell = cell
     self.parallel_iterations = parallel_iterations
     self.swap_memory = swap_memory
@@ -173,31 +172,24 @@ class DynamicUnroll(tf.keras.layers.Layer):
             "config": self.cell.get_config()
         }
     }
-    base_config = dict(super(DynamicUnroll, self).get_config())
-    base_config.update(config)
-    return base_config
+    return dict(super(DynamicUnroll, self).get_config()) | config
 
   @classmethod
   def from_config(cls, config, custom_objects=None):
     cell = tf.keras.layers.deserialize(
         config.pop("cell"), custom_objects=custom_objects)
-    layer = cls(cell, **config)
-    return layer
+    return cls(cell, **config)
 
   def compute_output_shape(self, input_shape):
     return self.cell.compute_output_shape(input_shape)
 
   @property
   def trainable_weights(self):
-    if not self.trainable:
-      return []
-    return self.cell.trainable_weights
+    return [] if not self.trainable else self.cell.trainable_weights
 
   @property
   def non_trainable_weights(self):
-    if not self.trainable:
-      return self.cell.weights
-    return self.cell.non_trainable_weights
+    return self.cell.non_trainable_weights if self.trainable else self.cell.weights
 
   @property
   def losses(self):
@@ -271,8 +263,8 @@ class DynamicUnroll(tf.keras.layers.Layer):
 
     inputs_flat = [
         tf.convert_to_tensor(x, name="input") for x in tf.nest.flatten(inputs)]
-    has_time_axis = all(
-        [x.shape.ndims is None or x.shape.ndims > 2 for x in inputs_flat])
+    has_time_axis = all(x.shape.ndims is None or x.shape.ndims > 2
+                        for x in inputs_flat)
 
     if not has_time_axis:
       # No time axis; and we're converting to time major anyway; add a time axis
@@ -401,11 +393,7 @@ def _dynamic_unroll_multi_step(cell,
             .unstack(x))
 
   inputs_tas = tf.nest.map_structure(ta_and_unstack, inputs)
-  if reset_mask is None:
-    reset_mask_ta = None
-  else:
-    reset_mask_ta = ta_and_unstack(reset_mask)
-
+  reset_mask_ta = None if reset_mask is None else ta_and_unstack(reset_mask)
   # Create a TensorArray for each output
   def create_output_ta(s):
     return tf.TensorArray(

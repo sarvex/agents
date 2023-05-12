@@ -37,15 +37,14 @@ def sample(distribution, reparam=False, **kwargs):
   Returns:
   """
   if reparam:
-    if (distribution.reparameterization_type !=
+    if (distribution.reparameterization_type ==
         tfp.distributions.FULLY_REPARAMETERIZED):
-      raise ValueError('This distribution cannot be reparameterized'
-                       ': {}'.format(distribution))
-    else:
       return distribution.sample(**kwargs)
+    else:
+      raise ValueError(
+          f'This distribution cannot be reparameterized: {distribution}')
+  elif isinstance(distribution, gumbel_softmax.GumbelSoftmax):
+    samples = distribution.sample(**kwargs)
+    return distribution.convert_to_one_hot(samples)
   else:
-    if isinstance(distribution, gumbel_softmax.GumbelSoftmax):
-      samples = distribution.sample(**kwargs)
-      return distribution.convert_to_one_hot(samples)
-    else:
-      return distribution.sample(**kwargs)
+    return distribution.sample(**kwargs)

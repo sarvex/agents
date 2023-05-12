@@ -84,8 +84,7 @@ class PolicyInfoUpdaterWrapper(tf_policy.TFPolicy):
     if not tf.TensorShape(tf.squeeze(tensor.get_shape())).is_compatible_with(
         tensorspec.shape):
       raise ValueError(
-          'Tensor {} is not compatible with specification {}.'.format(
-              tensor, tensorspec))
+          f'Tensor {tensor} is not compatible with specification {tensorspec}.')
 
   def apply_value_network(self, *args, **kwargs):
     return self._wrapped_policy.apply_value_network(*args, **kwargs)

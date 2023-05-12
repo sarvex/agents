@@ -120,14 +120,14 @@ class MovieLensPyEnvironment(bandit_py_environment.BanditPyEnvironment):
         range(self._effective_num_users), self._batch_size)
     self._previous_users = self._current_users
     self._current_users = sampled_users
-    batched_observations = self._u_hat[sampled_users]
-    return batched_observations
+    return self._u_hat[sampled_users]
 
   def _apply_action(self, action):
     """Computes the reward for the input actions."""
-    rewards = []
-    for i, j in zip(self._current_users, action):
-      rewards.append(self._approx_ratings_matrix[i, j])
+    rewards = [
+        self._approx_ratings_matrix[i, j]
+        for i, j in zip(self._current_users, action)
+    ]
     return np.array(rewards)
 
   def compute_optimal_action(self):

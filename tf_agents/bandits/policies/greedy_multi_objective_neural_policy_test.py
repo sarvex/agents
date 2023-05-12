@@ -545,19 +545,18 @@ class GreedyRewardPredictionPolicyTest(test_utils.TestCase):
         tf.feature_column.categorical_column_with_vocabulary_list(
             'sport', ['bridge', 'chess', 'snooker']))
 
-    objective_networks = []
-    for _ in range(3):
-      objective_networks.append(
-          global_and_arm_feature_network
-          .create_feed_forward_common_tower_network(
-              observation_spec=obs_spec,
-              global_layers=(4, 3, 2),
-              arm_layers=(6, 5, 4),
-              common_layers=(7, 6, 5),
-              global_preprocessing_combiner=(
-                  tf.compat.v2.keras.layers.DenseFeatures([columns_c])),
-              arm_preprocessing_combiner=tf.compat.v2.keras.layers
-              .DenseFeatures([columns_a, columns_b])))
+    objective_networks = [
+        global_and_arm_feature_network.create_feed_forward_common_tower_network(
+            observation_spec=obs_spec,
+            global_layers=(4, 3, 2),
+            arm_layers=(6, 5, 4),
+            common_layers=(7, 6, 5),
+            global_preprocessing_combiner=(
+                tf.compat.v2.keras.layers.DenseFeatures([columns_c])),
+            arm_preprocessing_combiner=tf.compat.v2.keras.layers.DenseFeatures(
+                [columns_a, columns_b]),
+        ) for _ in range(3)
+    ]
     time_step_spec = ts.time_step_spec(obs_spec)
     action_spec = tensor_spec.BoundedTensorSpec((), tf.int32, 0, 2)
     policy = greedy_multi_objective_policy.GreedyMultiObjectiveNeuralPolicy(

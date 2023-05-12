@@ -227,16 +227,15 @@ class QtOptAgent(tf_agent.TFAgent):
     self._num_elites_cem = num_elites_cem
     self._num_iter_cem = num_iter_cem
     self._in_graph_bellman_update = in_graph_bellman_update
-    if not in_graph_bellman_update:
-      if info_spec is not None:
-        self._info_spec = info_spec
-      else:
-        self._info_spec = {
-            'target_q': tensor_spec.TensorSpec((), tf.float32),
-        }
-    else:
+    if in_graph_bellman_update:
       self._info_spec = ()
 
+    elif info_spec is not None:
+      self._info_spec = info_spec
+    else:
+      self._info_spec = {
+          'target_q': tensor_spec.TensorSpec((), tf.float32),
+      }
     self._q_network = q_network
     net_observation_spec = (time_step_spec.observation, action_spec)
 
@@ -302,8 +301,8 @@ class QtOptAgent(tf_agent.TFAgent):
 
     if q_network.state_spec and n_step_update != 1:
       raise NotImplementedError(
-          'QtOptAgent does not currently support n-step updates with stateful '
-          'networks (i.e., RNNs), but n_step_update = {}'.format(n_step_update))
+          f'QtOptAgent does not currently support n-step updates with stateful networks (i.e., RNNs), but n_step_update = {n_step_update}'
+      )
 
     # Bypass the train_sequence_length check when RNN is used.
     train_sequence_length = (
@@ -332,16 +331,7 @@ class QtOptAgent(tf_agent.TFAgent):
 
   def _setup_data_converter(self, q_network, gamma, n_step_update):
     if q_network.state_spec:
-      if not self._in_graph_bellman_update:
-        self._data_context = data_converter.DataContext(
-            time_step_spec=self._time_step_spec,
-            action_spec=self._action_spec,
-            info_spec=self._collect_policy.info_spec,
-            policy_state_spec=self._q_network.state_spec,
-            use_half_transition=True)
-        self._as_transition = data_converter.AsHalfTransition(
-            self.data_context, squeeze_time_dim=False)
-      else:
+      if self._in_graph_bellman_update:
         self._data_context = data_converter.DataContext(
             time_step_spec=self._time_step_spec,
             action_spec=self._action_spec,
@@ -351,23 +341,31 @@ class QtOptAgent(tf_agent.TFAgent):
         self._as_transition = data_converter.AsTransition(
             self.data_context, squeeze_time_dim=False,
             prepend_t0_to_next_time_step=True)
-    else:
-      if not self._in_graph_bellman_update:
+      else:
         self._data_context = data_converter.DataContext(
             time_step_spec=self._time_step_spec,
             action_spec=self._action_spec,
             info_spec=self._collect_policy.info_spec,
             policy_state_spec=self._q_network.state_spec,
             use_half_transition=True)
-
         self._as_transition = data_converter.AsHalfTransition(
-            self.data_context, squeeze_time_dim=True)
-      else:
-        # This reduces the n-step return and removes the extra time dimension,
-        # allowing the rest of the computations to be independent of the
-        # n-step parameter.
-        self._as_transition = data_converter.AsNStepTransition(
-            self.data_context, gamma=gamma, n=n_step_update)
+            self.data_context, squeeze_time_dim=False)
+    elif not self._in_graph_bellman_update:
+      self._data_context = data_converter.DataContext(
+          time_step_spec=self._time_step_spec,
+          action_spec=self._action_spec,
+          info_spec=self._collect_policy.info_spec,
+          policy_state_spec=self._q_network.state_spec,
+          use_half_transition=True)
+
+      self._as_transition = data_converter.AsHalfTransition(
+          self.data_context, squeeze_time_dim=True)
+    else:
+      # This reduces the n-step return and removes the extra time dimension,
+      # allowing the rest of the computations to be independent of the
+      # n-step parameter.
+      self._as_transition = data_converter.AsNStepTransition(
+          self.data_context, gamma=gamma, n=n_step_update)
 
   def _setup_policy(self, time_step_spec, action_spec, emit_log_probability):
     policy = qtopt_cem_policy.CEMPolicy(
@@ -538,14 +536,12 @@ class QtOptAgent(tf_agent.TFAgent):
             sample_weight=weights,
             regularization_loss=auxiliary_reg_loss)
         total_auxiliary_loss += agg_auxiliary_loss.total_loss
-        losses_dict.update(
-            {'auxiliary_loss_{}'.format(
-                auxiliary_loss_fn.__name__
-                ): agg_auxiliary_loss.weighted,
-             'auxiliary_reg_loss_{}'.format(
-                 auxiliary_loss_fn.__name__
-                 ): agg_auxiliary_loss.regularization,
-             })
+        losses_dict.update({
+            f'auxiliary_loss_{auxiliary_loss_fn.__name__}':
+            agg_auxiliary_loss.weighted,
+            f'auxiliary_reg_loss_{auxiliary_loss_fn.__name__}':
+            agg_auxiliary_loss.regularization,
+        })
     return total_auxiliary_loss
 
   def _loss(self,

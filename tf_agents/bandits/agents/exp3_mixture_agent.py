@@ -61,9 +61,8 @@ class Exp3MixtureVariableCollection(tf.Module):
     """
     if reward_aggregates is None:
       reward_aggregates = [0.0] * num_agents
-    else:
-      if num_agents != len(reward_aggregates):
-        raise ValueError('`reward_aggregates` must have `num_agents` elements.')
+    elif num_agents != len(reward_aggregates):
+      raise ValueError('`reward_aggregates` must have `num_agents` elements.')
     self._reward_aggregates = tf.Variable(
         reward_aggregates, name='reward_aggregates', dtype=tf.float32)
     self._inverse_temperature = tf.Variable(
@@ -191,9 +190,10 @@ class Exp3MixtureAgent(mixture_agent.MixtureAgent):
   def _summarize_probabilities(self, probabilities):
     for k in range(self._num_agents):
       tf.compat.v2.summary.scalar(
-          name='policy_{}_prob'.format(k),
+          name=f'policy_{k}_prob',
           data=probabilities[k],
-          step=self.train_step_counter)
+          step=self.train_step_counter,
+      )
 
   def _update_aggregates(self, update_term):
     self._variable_collection.reward_aggregates.assign(

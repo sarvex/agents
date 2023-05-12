@@ -45,8 +45,7 @@ def _pack_named_sequence(flat_inputs, input_spec, batch_shape):
       named_input.set_shape(batch_shape.concatenate(spec.shape))
     named_inputs.append(named_input)
 
-  nested_inputs = tf.nest.pack_sequence_as(input_spec, named_inputs)
-  return nested_inputs
+  return tf.nest.pack_sequence_as(input_spec, named_inputs)
 
 
 @contextlib.contextmanager
@@ -127,13 +126,8 @@ class TFPyEnvironment(tf_environment.TFEnvironment):
       self._pool = None
     elif isinstance(isolation, pool.Pool):
       self._pool = isolation
-    elif isolation:
-      self._pool = pool.ThreadPool(1)
     else:
-      raise TypeError(
-          'isolation should be True, False, or an instance of '
-          'a multiprocessing Pool or ThreadPool.  Saw: {}'.format(isolation))
-
+      self._pool = pool.ThreadPool(1)
     if callable(environment):
       environment = self._execute(environment)
     if not isinstance(environment, py_environment.PyEnvironment):
@@ -373,7 +367,4 @@ class TFPyEnvironment(tf_environment.TFEnvironment):
     """Forms a `TimeStep` from the output of the numpy_function outputs."""
     batch_shape = () if not self.batched else (self.batch_size,)
     batch_shape = tf.TensorShape(batch_shape)
-    time_step = _pack_named_sequence(outputs,
-                                     self.time_step_spec(),
-                                     batch_shape)
-    return time_step
+    return _pack_named_sequence(outputs, self.time_step_spec(), batch_shape)

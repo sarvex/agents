@@ -69,7 +69,7 @@ class BatchedPyPolicy(py_policy.PyPolicy):
       ValueError: If the action or observation specs don't match.
     """
     if not isinstance(policies, (list, tuple)):
-      raise ValueError("policies must be a list or tuple.  Got: %s" % policies)
+      raise ValueError(f"policies must be a list or tuple.  Got: {policies}")
 
     self._parallel_execution = multithreading
     self._policies = policies
@@ -82,7 +82,7 @@ class BatchedPyPolicy(py_policy.PyPolicy):
     self._trajectory_spec = self._policies[0].trajectory_spec
     self._collect_data_spec = self._policies[0].collect_data_spec
     self._observation_and_action_constraint_splitter = \
-        self._policies[0].observation_and_action_constraint_splitter
+          self._policies[0].observation_and_action_constraint_splitter
 
     self._validate_spec(py_policy.PyPolicy.time_step_spec,
                         self._time_step_spec)
@@ -124,7 +124,7 @@ class BatchedPyPolicy(py_policy.PyPolicy):
     if any(policy_spec_method.__get__(p) != spec_to_match
            for p in self._policies):
       raise ValueError(
-          "All policies must have the same specs.  Saw: %s" % self._policies)
+          f"All policies must have the same specs.  Saw: {self._policies}")
     # pytype: enable=attribute-error
 
   def _execute(self, fn, iterable):
@@ -137,10 +137,9 @@ class BatchedPyPolicy(py_policy.PyPolicy):
     if self._num_policies == 1:
       return nest_utils.batch_nested_array(
           self._policies[0].get_initial_state())
-    else:
-      infos = self._execute(_execute_get_initial_state, self._policies)
-      infos = nest_utils.unbatch_nested_array(infos)
-      return nest_utils.stack_nested_arrays(infos)
+    infos = self._execute(_execute_get_initial_state, self._policies)
+    infos = nest_utils.unbatch_nested_array(infos)
+    return nest_utils.stack_nested_arrays(infos)
 
   def _action(self,
               time_step: ts.TimeStep,
@@ -164,8 +163,7 @@ class BatchedPyPolicy(py_policy.PyPolicy):
       NotImplementedError: if `seed` is not None.
     """
     if seed is not None:
-      raise NotImplementedError(
-          "seed is not supported; but saw seed: {}".format(seed))
+      raise NotImplementedError(f"seed is not supported; but saw seed: {seed}")
     if self._num_policies == 1:
       time_step = nest_utils.unbatch_nested_array(time_step)
       policy_state = nest_utils.unbatch_nested_array(policy_state)

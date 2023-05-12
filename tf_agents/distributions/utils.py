@@ -84,8 +84,9 @@ class SquashToSpecNormal(tfp.distributions.Distribution):
     if not isinstance(
         distribution,
         (tfp.distributions.Normal, tfp.distributions.MultivariateNormalDiag)):
-      raise ValueError("Input distribution must be a normal distribution, "
-                       "got {} instead".format(distribution))
+      raise ValueError(
+          f"Input distribution must be a normal distribution, got {distribution} instead"
+      )
     self.action_means, self.action_magnitudes = common.spec_means_and_magnitudes(
         spec)
     # Parameters here describe the actor network's output, which is a normalized
@@ -120,15 +121,14 @@ class SquashToSpecNormal(tfp.distributions.Distribution):
   def kl_divergence(self, other, name="kl_divergence"):
     """Computes the KL Divergence between two SquashToSpecNormal distributions."""
     if not isinstance(other, SquashToSpecNormal):
-      raise ValueError("other distribution should be of type "
-                       "SquashToSpecNormal, got {}".format(other))
+      raise ValueError(
+          f"other distribution should be of type SquashToSpecNormal, got {other}"
+      )
     if (np.any(self.action_means != other.action_means) or
         np.any(self.action_magnitudes != other.action_magnitudes)):
-      raise ValueError("Other distribution does not have same action mean "
-                       "and magnitude. This mean {}, this magnitude {}, "
-                       "other mean {}, other magnitude {}.".format(
-                           self.action_means, self.action_magnitudes,
-                           other.action_means, other.action_magnitudes))
+      raise ValueError(
+          f"Other distribution does not have same action mean and magnitude. This mean {self.action_means}, this magnitude {self.action_magnitudes}, other mean {other.action_means}, other magnitude {other.action_magnitudes}."
+      )
     return self.input_distribution.kl_divergence(other.input_distribution, name)
 
   def sample(self, sample_shape=(), seed=None, name="sample"):
@@ -145,14 +145,12 @@ class SquashToSpecNormal(tfp.distributions.Distribution):
 
   def stddev(self, name="stddev"):
     """Compute stddev of the SquashToSpecNormal distribution."""
-    stddev = self.action_magnitudes * tf.tanh(self.input_distribution.stddev())
-    return stddev
+    return self.action_magnitudes * tf.tanh(self.input_distribution.stddev())
 
   def mode(self, name="mode"):
     """Compute mean of the SquashToSpecNormal distribution."""
-    mean = self.action_magnitudes * tf.tanh(self.input_distribution.mode()) + \
-        self.action_means
-    return mean
+    return (self.action_magnitudes * tf.tanh(self.input_distribution.mode()) +
+            self.action_means)
 
   def mean(self, name="mean", **kwargs):
     """Compute mean of the SquashToSpecNormal distribution."""
@@ -235,7 +233,7 @@ class Params(object):
   params: Mapping[Text, Any]
 
   def __str__(self):
-    return "<Params: type={}, params={}>".format(self.type_, self.params)
+    return f"<Params: type={self.type_}, params={self.params}>"
 
   def __repr__(self):
     return str(self)
@@ -277,10 +275,7 @@ def get_parameters(value: Any) -> Params:
   params = {}
 
   def process_parameter(p):
-    if getattr(p, "parameters", None) is not None:
-      return get_parameters(p)
-    else:
-      return p
+    return get_parameters(p) if getattr(p, "parameters", None) is not None else p
 
   if getattr(value, "parameters"):
     default_values = inspect.signature(type_.__init__).parameters.items()
@@ -538,8 +533,7 @@ def _check_no_tensors(parameters: Params):
     if isinstance(p, Params):
       _check_no_tensors(p)
     if tf.is_tensor(p):
-      raise TypeError(
-          "Saw a `Tensor` value in parameters:\n  {}".format(parameters))
+      raise TypeError(f"Saw a `Tensor` value in parameters:\n  {parameters}")
 
 
 class DistributionSpecV2(object):
@@ -594,8 +588,7 @@ class DistributionSpecV2(object):
             and self._parameters == other._parameters)
 
   def __str__(self):
-    return ("<DistributionSpecV2: event_shape={}, dtype={}, parameters={}>"
-            .format(self.event_shape, self.dtype, self.parameters))
+    return f"<DistributionSpecV2: event_shape={self.event_shape}, dtype={self.dtype}, parameters={self.parameters}>"
 
   def __repr__(self):
     return str(self)

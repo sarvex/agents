@@ -53,7 +53,7 @@ def _create_server(
               signature=signature)
       ],
       port=portpicker.pick_unused_port())
-  return server, 'localhost:{}'.format(server.port)
+  return server, f'localhost:{server.port}'
 
 
 def _create_nested_variable() -> types.NestedVariable:

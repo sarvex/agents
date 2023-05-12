@@ -145,13 +145,14 @@ class Exp3MixtureAgentTest(test_utils.TestCase, parameterized.TestCase):
     time_step_spec = time_step.time_step_spec(observation_spec)
     action_spec = tensor_spec.BoundedTensorSpec(
         dtype=tf.int32, shape=(), minimum=0, maximum=num_actions - 1)
-    agents = []
     policy_info = (policy_utilities.InfoFields.PREDICTED_REWARDS_MEAN,
                   ) if emit_policy_info else ()
-    for _ in range(num_agents):
-      agents.append(
-          lin_ucb_agent.LinearUCBAgent(
-              time_step_spec, action_spec, emit_policy_info=policy_info))
+    agents = [
+        lin_ucb_agent.LinearUCBAgent(time_step_spec,
+                                     action_spec,
+                                     emit_policy_info=policy_info)
+        for _ in range(num_agents)
+    ]
     mixed_agent = exp3_mixture_agent.Exp3MixtureAgent(agents)
     initial_step, final_step = _get_initial_and_final_steps(
         batch_size, context_dim)

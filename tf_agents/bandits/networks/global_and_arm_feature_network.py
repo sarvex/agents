@@ -45,10 +45,9 @@ def _remove_num_actions_dim_from_spec(
               observation_spec[bandit_spec_utils.PER_ARM_FEATURE_KEY], 1)
   }
   if bandit_spec_utils.NUM_ACTIONS_FEATURE_KEY in observation_spec:
-    obs_spec_no_num_actions.update({
-        bandit_spec_utils.NUM_ACTIONS_FEATURE_KEY:
-            observation_spec[bandit_spec_utils.NUM_ACTIONS_FEATURE_KEY]
-    })
+    obs_spec_no_num_actions[
+        bandit_spec_utils.NUM_ACTIONS_FEATURE_KEY] = observation_spec[
+            bandit_spec_utils.NUM_ACTIONS_FEATURE_KEY]
   return obs_spec_no_num_actions
 
 

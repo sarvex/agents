@@ -90,7 +90,7 @@ class PolicyInfoUpdaterWrapperTest(test_utils.TestCase, parameterized.TestCase):
     updater_info_spec = {
         'model_id': tf.TensorSpec(shape=(1,), dtype=tf.int32, name='model_id')
     }
-    updater_info_spec.update(wrapped_policy.info_spec)
+    updater_info_spec |= wrapped_policy.info_spec
     policy = policy_info_updater_wrapper.PolicyInfoUpdaterWrapper(
         policy=wrapped_policy,
         info_spec=updater_info_spec,

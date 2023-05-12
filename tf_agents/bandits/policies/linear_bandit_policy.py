@@ -185,17 +185,15 @@ class LinearBanditPolicy(tf_policy.TFPolicy):
     self._overall_context_dim = self._global_context_dim + self._arm_context_dim
     cov_matrix_dim = tf.compat.dimension_value(cov_matrix[0].shape[0])
     if self._overall_context_dim != cov_matrix_dim:
-      raise ValueError('The dimension of matrix `cov_matrix` must match '
-                       'overall context dimension {}. '
-                       'Got {} for `cov_matrix`.'.format(
-                           self._overall_context_dim, cov_matrix_dim))
+      raise ValueError(
+          f'The dimension of matrix `cov_matrix` must match overall context dimension {self._overall_context_dim}. Got {cov_matrix_dim} for `cov_matrix`.'
+      )
 
     data_vector_dim = tf.compat.dimension_value(data_vector[0].shape[0])
     if self._overall_context_dim != data_vector_dim:
-      raise ValueError('The dimension of vector `data_vector` must match '
-                       'context  dimension {}. '
-                       'Got {} for `data_vector`.'.format(
-                           self._overall_context_dim, data_vector_dim))
+      raise ValueError(
+          f'The dimension of vector `data_vector` must match context  dimension {self._overall_context_dim}. Got {data_vector_dim} for `data_vector`.'
+      )
 
     self._dtype = self._data_vector[0].dtype
     self._emit_policy_info = emit_policy_info
@@ -240,9 +238,8 @@ class LinearBanditPolicy(tf_policy.TFPolicy):
     if not global_observation.shape.is_compatible_with(
         [None, self._global_context_dim]):
       raise ValueError(
-          'Global observation shape is expected to be {}. Got {}.'.format(
-              [None, self._global_context_dim],
-              global_observation.shape.as_list()))
+          f'Global observation shape is expected to be {[None, self._global_context_dim]}. Got {global_observation.shape.as_list()}.'
+      )
     global_observation = tf.reshape(global_observation,
                                     [-1, self._global_context_dim])
 
@@ -292,8 +289,8 @@ class LinearBanditPolicy(tf_policy.TFPolicy):
           tf.sqrt(tf.squeeze(tf.stack(confidence_intervals, axis=-1), axis=1)))
       rewards_for_argmax = mu_sampler.sample()
     else:
-      raise ValueError('Exploraton strategy %s not implemented.' %
-                       self._exploration_strategy)
+      raise ValueError(
+          f'Exploraton strategy {self._exploration_strategy} not implemented.')
 
     mask = constraints.construct_mask_from_multiple_sources(
         time_step.observation, self._observation_and_action_constraint_splitter,
@@ -321,27 +318,23 @@ class LinearBanditPolicy(tf_policy.TFPolicy):
 
   def _check_input_variables(self):
     if len(self._cov_matrix) != len(self._data_vector):
-      raise ValueError('The size of list cov_matrix must match the size of '
-                       'list data_vector. Got {} for cov_matrix and {} '
-                       'for data_vector'.format(
-                           len(self._cov_matrix), len((self._data_vector))))
+      raise ValueError(
+          f'The size of list cov_matrix must match the size of list data_vector. Got {len(self._cov_matrix)} for cov_matrix and {len(self._data_vector)} for data_vector'
+      )
     if len(self._num_samples) != len(self._cov_matrix):
-      raise ValueError('The size of num_samples must match the size of '
-                       'list cov_matrix. Got {} for num_samples and {} '
-                       'for cov_matrix'.format(
-                           len(self._num_samples), len((self._cov_matrix))))
+      raise ValueError(
+          f'The size of num_samples must match the size of list cov_matrix. Got {len(self._num_samples)} for num_samples and {len(self._cov_matrix)} for cov_matrix'
+      )
 
     if self._accepts_per_arm_features:
       if len(self._cov_matrix) != 1:
         raise ValueError(
-            'If the policy accepts per-arm features, the length of `cov_matrix`'
-            ' list must be 1. Got {} instead.'.format(len(self._cov_matrix)))
-    else:
-      if self._num_actions != len(self._cov_matrix):
-        raise ValueError(
-            'The number of elements in `cov_matrix` ({}) must match '
-            'the number of actions derived from `action_spec` ({}).'.format(
-                len(self._cov_matrix), self._num_actions))
+            f'If the policy accepts per-arm features, the length of `cov_matrix` list must be 1. Got {len(self._cov_matrix)} instead.'
+        )
+    elif self._num_actions != len(self._cov_matrix):
+      raise ValueError(
+          f'The number of elements in `cov_matrix` ({len(self._cov_matrix)}) must match the number of actions derived from `action_spec` ({self._num_actions}).'
+      )
 
   def _populate_policy_info_spec(self, observation_spec,
                                  observation_and_action_constraint_splitter):
@@ -365,17 +358,18 @@ class LinearBanditPolicy(tf_policy.TFPolicy):
       chosen_arm_features_info = (
           policy_utilities.create_chosen_arm_features_info_spec(
               observation_spec))
-      info_spec = policy_utilities.PerArmPolicyInfo(
+      return policy_utilities.PerArmPolicyInfo(
           predicted_rewards_mean=predicted_rewards_mean,
           predicted_rewards_optimistic=predicted_rewards_optimistic,
           predicted_rewards_sampled=predicted_rewards_sampled,
-          chosen_arm_features=chosen_arm_features_info)
+          chosen_arm_features=chosen_arm_features_info,
+      )
     else:
-      info_spec = policy_utilities.PolicyInfo(
+      return policy_utilities.PolicyInfo(
           predicted_rewards_mean=predicted_rewards_mean,
           predicted_rewards_optimistic=predicted_rewards_optimistic,
-          predicted_rewards_sampled=predicted_rewards_sampled)
-    return info_spec
+          predicted_rewards_sampled=predicted_rewards_sampled,
+      )
 
   def _get_current_observation(self, global_observation, arm_observations,
                                arm_index):
@@ -400,9 +394,7 @@ class LinearBanditPolicy(tf_policy.TFPolicy):
     """
     if self._accepts_per_arm_features:
       current_arm = arm_observations[:, arm_index, :]
-      current_observation = tf.concat([global_observation, current_arm],
-                                      axis=-1)
-      return current_observation
+      return tf.concat([global_observation, current_arm], axis=-1)
     else:
       return global_observation
 
@@ -414,9 +406,8 @@ class LinearBanditPolicy(tf_policy.TFPolicy):
       if not arm_observations.shape.is_compatible_with(
           [None, self._num_actions, self._arm_context_dim]):
         raise ValueError(
-            'Arm observation shape is expected to be {}. Got {}.'.format(
-                [None, self._num_actions, self._arm_context_dim],
-                arm_observations.shape.as_list()))
+            f'Arm observation shape is expected to be {[None, self._num_actions, self._arm_context_dim]}. Got {arm_observations.shape.as_list()}.'
+        )
     else:
       global_observation = observation
       arm_observations = None

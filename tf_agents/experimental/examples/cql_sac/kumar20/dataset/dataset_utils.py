@@ -53,20 +53,19 @@ def create_collect_data_spec(
         next_step_type=ArraySpec(shape=step_type.shape, dtype=step_type.dtype),
         reward=ArraySpec(shape=reward.shape, dtype=reward.dtype),
         discount=ArraySpec(shape=discount.shape, dtype=discount.dtype))
-  else:
-    time_step_spec = time_step.TimeStep(
-        step_type=ArraySpec(shape=step_type.shape, dtype=step_type.dtype),
-        reward=ArraySpec(shape=reward.shape, dtype=reward.dtype),
-        discount=ArraySpec(shape=discount.shape, dtype=discount.dtype),
-        observation=ArraySpec(shape=observation.shape, dtype=observation.dtype))
-    action_spec = policy_step.PolicyStep(
-        action=ArraySpec(shape=action.shape, dtype=action.dtype),
-        state=(),
-        info=())
-    return trajectory.Transition(
-        time_step=time_step_spec,
-        action_step=action_spec,
-        next_time_step=time_step_spec)
+  time_step_spec = time_step.TimeStep(
+      step_type=ArraySpec(shape=step_type.shape, dtype=step_type.dtype),
+      reward=ArraySpec(shape=reward.shape, dtype=reward.dtype),
+      discount=ArraySpec(shape=discount.shape, dtype=discount.dtype),
+      observation=ArraySpec(shape=observation.shape, dtype=observation.dtype))
+  action_spec = policy_step.PolicyStep(
+      action=ArraySpec(shape=action.shape, dtype=action.dtype),
+      state=(),
+      info=())
+  return trajectory.Transition(
+      time_step=time_step_spec,
+      action_step=action_spec,
+      next_time_step=time_step_spec)
 
 
 def create_episode_dataset(

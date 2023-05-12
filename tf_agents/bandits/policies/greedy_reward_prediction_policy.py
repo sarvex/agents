@@ -95,8 +95,8 @@ class GreedyRewardPredictionPolicy(tf_policy.TFPolicy):
         action_spec.shape.rank > 1 or
         action_spec.shape.num_elements() != 1):
       raise NotImplementedError(
-          'action_spec must be a BoundedTensorSpec of type int32 and shape (). '
-          'Found {}.'.format(action_spec))
+          f'action_spec must be a BoundedTensorSpec of type int32 and shape (). Found {action_spec}.'
+      )
     self._expected_num_actions = action_spec.maximum - action_spec.minimum + 1
     self._action_offset = action_spec.minimum
     reward_network.create_variables()

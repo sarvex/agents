@@ -59,8 +59,7 @@ def _standard_normalize(values, axes=(0,)):
   """
   values_mean, values_var = tf.nn.moments(x=values, axes=axes, keepdims=True)
   epsilon = np.finfo(values.dtype.as_numpy_dtype).eps
-  normalized_values = ((values - values_mean) / (tf.sqrt(values_var) + epsilon))
-  return normalized_values
+  return ((values - values_mean) / (tf.sqrt(values_var) + epsilon))
 
 
 def _entropy_loss(distributions, spec, weights=None):
@@ -347,10 +346,10 @@ class ReinforceAgent(tf_agent.TFAgent):
       advantages = _standard_normalize(advantages, axes=(0, 1))
       if self._debug_summaries:
         tf.compat.v2.summary.histogram(
-            name='normalized_%s' %
-            ('advantages' if self._baseline else 'returns'),
+            name=f"normalized_{'advantages' if self._baseline else 'returns'}",
             data=advantages,
-            step=self.train_step_counter)
+            step=self.train_step_counter,
+        )
 
     nest_utils.assert_same_structure(time_steps, self.time_step_spec)
     policy_state = _get_initial_policy_state(self.collect_policy, time_steps)

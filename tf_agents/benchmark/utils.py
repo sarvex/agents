@@ -61,11 +61,10 @@ def run_test(target_call,
         strategy.run(target_call, args=(next(iterator),))
       else:
         strategy.run(target_call)
+    elif iterator:
+      target_call(next(iterator))
     else:
-      if iterator:
-        target_call(next(iterator))
-      else:
-        target_call()
+      target_call()
     history.on_batch_end()
 
   return history
@@ -79,8 +78,7 @@ class BatchTimestamp(object):
     self.timestamp = timestamp
 
   def __repr__(self):
-    return "'BatchTimestamp<batch_index: {}, timestamp: {}>'".format(
-        self.batch_index, self.timestamp)
+    return f"'BatchTimestamp<batch_index: {self.batch_index}, timestamp: {self.timestamp}>'"
 
 
 class TimeHistory(object):
@@ -180,14 +178,12 @@ def get_variable_value(agent, name):
   """Returns the value of the trainable variable with the given name."""
   policy_vars = agent.policy.variables()
   tf_vars = [v for v in policy_vars if name in v.name]
-  assert tf_vars, 'Variable "{}" does not exist. Found: {}'.format(
-      name, policy_vars)
-  if tf.executing_eagerly() and len(tf_vars) > 1:
-    var = tf_vars[0]
-  else:
-    assert len(tf_vars) == 1, 'More than one variable with name {}. {}'.format(
-        name, [(v.name, v.shape) for v in tf_vars])
-    var = tf_vars[0]
+  assert tf_vars, f'Variable "{name}" does not exist. Found: {policy_vars}'
+  if not tf.executing_eagerly() or len(tf_vars) <= 1:
+    assert (
+        len(tf_vars) == 1
+    ), f'More than one variable with name {name}. {[(v.name, v.shape) for v in tf_vars]}'
+  var = tf_vars[0]
   return var.numpy() if tf.executing_eagerly() else var.eval()
 
 
@@ -203,8 +199,9 @@ def check_values_changed(agent, initial_values, check_value_changes, name=None):
   for var_name, initial, final in zip(check_value_changes, initial_values,
                                       final_values):
     all_close = np.allclose(initial, final)
-    assert not all_close, ('[{}] Variable "{}" did not change: {} -> {}'.format(
-        name, var_name, initial, final))
+    assert (
+        not all_close
+    ), f'[{name}] Variable "{var_name}" did not change: {initial} -> {final}'
 
 
 def summary_iterator(path: str) -> event_pb2.Event:
@@ -244,9 +241,9 @@ def find_event_log(eventlog_dir: str,
   if not event_files:
     raise FileNotFoundError(f'No files found matching pattern:{event_log_path}')
 
-  assert len(event_files) == 1, (
-      'Found {} event files({}) matching "{}" pattern and expected 1.'.format(
-          len(event_files), ','.join(event_files), event_log_path))
+  assert (
+      len(event_files) == 1
+  ), f"""Found {len(event_files)} event files({','.join(event_files)}) matching "{event_log_path}" pattern and expected 1."""
 
   return event_files[0]
 

@@ -44,18 +44,17 @@ class RNNWrapper(tf.keras.layers.Layer):
     """
     if not isinstance(layer, tf.keras.layers.RNN):
       raise TypeError(
-          'layer is not a subclass of tf.keras.layers.RNN.  Layer: {}'.format(
-              layer))
+          f'layer is not a subclass of tf.keras.layers.RNN.  Layer: {layer}')
     layer_config = layer.get_config()
     if not layer_config.get('return_state', False):
       # This is an RNN layer that doesn't return state.
       raise NotImplementedError(
-          'Provided a Keras RNN layer with return_state==False. '
-          'This configuration is not supported.  Layer: {}'.format(layer))
+          f'Provided a Keras RNN layer with return_state==False. This configuration is not supported.  Layer: {layer}'
+      )
     if not layer_config.get('return_sequences', False):
       raise NotImplementedError(
-          'Provided a Keras RNN layer with return_sequences==False. '
-          'This configuration is not supported.  Layer: {}'.format(layer))
+          f'Provided a Keras RNN layer with return_sequences==False. This configuration is not supported.  Layer: {layer}'
+      )
 
     self._layer = layer
     super(RNNWrapper, self).__init__(**kwargs)
@@ -86,25 +85,20 @@ class RNNWrapper(tf.keras.layers.Layer):
             'config': self._layer.get_config()
         }
     }
-    base_config = dict(super(RNNWrapper, self).get_config())
-    base_config.update(config)
-    return base_config
+    return dict(super(RNNWrapper, self).get_config()) | config
 
   @classmethod
   def from_config(cls, config, custom_objects=None):
     internal_layer = tf.keras.layers.deserialize(
         config.pop('layer'), custom_objects=custom_objects)
-    layer = cls(internal_layer, **config)
-    return layer
+    return cls(internal_layer, **config)
 
   def compute_output_shape(self, input_shape):
     return self._layer.compute_output_shape(input_shape)
 
   @property
   def trainable_weights(self):
-    if not self.trainable:
-      return []
-    return self._layer.trainable_weights
+    return [] if not self.trainable else self._layer.trainable_weights
 
   @property
   def non_trainable_weights(self):
@@ -133,8 +127,8 @@ class RNNWrapper(tf.keras.layers.Layer):
         tf.convert_to_tensor(x, name='input', dtype_hint=self.dtype)
         for x in tf.nest.flatten(inputs)
     ]
-    has_time_axis = all(
-        [x.shape.ndims is None or x.shape.ndims > 2 for x in inputs_flat])
+    has_time_axis = all(x.shape.ndims is None or x.shape.ndims > 2
+                        for x in inputs_flat)
     if not has_time_axis:
       inputs_flat = [tf.expand_dims(t, axis=1) for t in inputs_flat]
     inputs = tf.nest.pack_sequence_as(inputs, inputs_flat)
@@ -162,8 +156,8 @@ class RNNWrapper(tf.keras.layers.Layer):
         tf.convert_to_tensor(x, name='input', dtype_hint=self.dtype)
         for x in tf.nest.flatten(inputs)
     ]
-    has_time_axis = all(
-        [x.shape.ndims is None or x.shape.ndims > 2 for x in inputs_flat])
+    has_time_axis = all(x.shape.ndims is None or x.shape.ndims > 2
+                        for x in inputs_flat)
     if not has_time_axis:
       inputs_flat = [tf.expand_dims(t, axis=1) for t in inputs_flat]
     inputs = tf.nest.pack_sequence_as(inputs, inputs_flat)

@@ -36,7 +36,7 @@ def check_unbatched_time_step_spec(time_step, time_step_spec, batch_size):
   if batch_size is None:
     return array_spec.check_arrays_nest(time_step, time_step_spec)
 
-  if not all([spec.shape[0] == batch_size for spec in time_step]):
+  if any(spec.shape[0] != batch_size for spec in time_step):
     return False
 
   unbatched_time_step = ts.TimeStep(

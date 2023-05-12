@@ -81,29 +81,28 @@ class LinearBanditVariableCollection(tf.Module):
       self.cov_matrix_list.append(
           tf.compat.v2.Variable(
               tf.zeros([context_dim, context_dim], dtype=dtype),
-              name='a_' + str(k)))
+              name=f'a_{str(k)}',
+          ))
       self.data_vector_list.append(
-          tf.compat.v2.Variable(
-              tf.zeros(context_dim, dtype=dtype), name='b_{}'.format(k)))
+          tf.compat.v2.Variable(tf.zeros(context_dim, dtype=dtype),
+                                name=f'b_{k}'))
       self.num_samples_list.append(
-          tf.compat.v2.Variable(
-              tf.zeros([], dtype=dtype), name='num_samples_{}'.format(k)))
+          tf.compat.v2.Variable(tf.zeros([], dtype=dtype),
+                                name=f'num_samples_{k}'))
       if use_eigendecomp:
         self.eig_matrix_list.append(
-            tf.compat.v2.Variable(
-                tf.eye(context_dim, dtype=dtype),
-                name='eig_matrix{}'.format(k)))
+            tf.compat.v2.Variable(tf.eye(context_dim, dtype=dtype),
+                                  name=f'eig_matrix{k}'))
         self.eig_vals_list.append(
-            tf.compat.v2.Variable(
-                tf.ones([context_dim], dtype=dtype),
-                name='eig_vals{}'.format(k)))
+            tf.compat.v2.Variable(tf.ones([context_dim], dtype=dtype),
+                                  name=f'eig_vals{k}'))
       else:
         self.eig_matrix_list.append(
-            tf.compat.v2.Variable(
-                tf.constant([], dtype=dtype), name='eig_matrix{}'.format(k)))
+            tf.compat.v2.Variable(tf.constant([], dtype=dtype),
+                                  name=f'eig_matrix{k}'))
         self.eig_vals_list.append(
-            tf.compat.v2.Variable(
-                tf.constant([], dtype=dtype), name='eig_vals{}'.format(k)))
+            tf.compat.v2.Variable(tf.constant([], dtype=dtype),
+                                  name=f'eig_vals{k}'))
 
 
 def update_a_and_b_with_forgetting(
@@ -276,8 +275,9 @@ class LinearBanditAgent(tf_agent.TFAgent):
         ExplorationPolicy.linear_thompson_sampling_policy):
       exploration_strategy = lin_policy.ExplorationStrategy.sampling
     else:
-      raise ValueError('Linear bandit agent with policy %s not implemented' %
-                       exploration_policy)
+      raise ValueError(
+          f'Linear bandit agent with policy {exploration_policy} not implemented'
+      )
     policy = lin_policy.LinearBanditPolicy(
         action_spec=action_spec,
         cov_matrix=self._cov_matrix_list,
@@ -351,48 +351,51 @@ class LinearBanditAgent(tf_agent.TFAgent):
     The returned matrix has shape (num_actions, context_dim).
     It's equivalent to a stacking of theta vectors from the paper.
     """
-    thetas = []
-    for k in range(self._num_models):
-      thetas.append(
-          tf.squeeze(
-              linalg.conjugate_gradient(
-                  self._cov_matrix_list[k] + self._tikhonov_weight *
-                  tf.eye(self._overall_context_dim, dtype=self._dtype),
-                  tf.expand_dims(self._data_vector_list[k], axis=-1)),
-              axis=-1))
-
+    thetas = [
+        tf.squeeze(
+            linalg.conjugate_gradient(
+                self._cov_matrix_list[k] + self._tikhonov_weight *
+                tf.eye(self._overall_context_dim, dtype=self._dtype),
+                tf.expand_dims(self._data_vector_list[k], axis=-1),
+            ),
+            axis=-1,
+        ) for k in range(self._num_models)
+    ]
     return tf.stack(thetas, axis=0)
 
   def _initialize(self):
     tf.compat.v1.variables_initializer(self.variables)
 
   def compute_summaries(self, loss: types.Tensor):
-    if self.summaries_enabled:
-      with tf.name_scope('Losses/'):
-        tf.compat.v2.summary.scalar(
-            name='loss', data=loss, step=self.train_step_counter)
+    if not self.summaries_enabled:
+      return
+    with tf.name_scope('Losses/'):
+      tf.compat.v2.summary.scalar(
+          name='loss', data=loss, step=self.train_step_counter)
 
-      if self._summarize_grads_and_vars:
-        with tf.name_scope('Variables/'):
-          for var in self.policy.variables():
-            var_name = var.name.replace(':', '_')
-            tf.compat.v2.summary.histogram(
-                name=var_name,
-                data=var,
-                step=self.train_step_counter)
-            tf.compat.v2.summary.scalar(
-                name=var_name + '_value_norm',
-                data=tf.linalg.global_norm([var]),
-                step=self.train_step_counter)
-        if self._add_bias:
-          thetas = self.theta
-          biases = thetas[:, self._global_context_dim - 1]
-          bias_list = tf.unstack(biases, axis=0)
-          for i in range(self._num_actions):
-            tf.compat.v2.summary.scalar(
-                name='bias/action_' + str(i),
-                data=bias_list[i],
-                step=self.train_step_counter)
+    if self._summarize_grads_and_vars:
+      with tf.name_scope('Variables/'):
+        for var in self.policy.variables():
+          var_name = var.name.replace(':', '_')
+          tf.compat.v2.summary.histogram(
+              name=var_name,
+              data=var,
+              step=self.train_step_counter)
+          tf.compat.v2.summary.scalar(
+              name=f'{var_name}_value_norm',
+              data=tf.linalg.global_norm([var]),
+              step=self.train_step_counter,
+          )
+      if self._add_bias:
+        thetas = self.theta
+        biases = thetas[:, self._global_context_dim - 1]
+        bias_list = tf.unstack(biases, axis=0)
+        for i in range(self._num_actions):
+          tf.compat.v2.summary.scalar(
+              name=f'bias/action_{str(i)}',
+              data=bias_list[i],
+              step=self.train_step_counter,
+          )
 
   def _process_experience(self, experience):
     """Given an experience, returns reward, action, observation, and batch size."""

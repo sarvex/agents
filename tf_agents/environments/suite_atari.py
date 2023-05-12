@@ -65,8 +65,8 @@ def game(name: Text = 'Pong',
   assert mode in ['', 'NoFrameskip', 'Deterministic']
   assert version in ['v0', 'v4']
   if obs_type == 'ram':
-    name = '{}-ram'.format(name)
-  return '{}{}-{}'.format(name, mode, version)
+    name = f'{name}-ram'
+  return f'{name}{mode}-{version}'
 
 
 @gin.configurable

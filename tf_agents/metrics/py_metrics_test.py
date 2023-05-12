@@ -201,7 +201,7 @@ class PyMetricsTest(tf.test.TestCase, parameterized.TestCase):
       metric(trajectory.last((), (), (), 3., 0.))
 
     checkpoint = tf.train.Checkpoint(**{m.name: m for m in metrics})
-    prefix = self.get_temp_dir() + '/ckpt'
+    prefix = f'{self.get_temp_dir()}/ckpt'
     save_path = checkpoint.save(prefix)
     for metric in metrics:
       metric.reset()

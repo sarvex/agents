@@ -82,9 +82,7 @@ def build_laplacian_over_ordinal_integer_actions(
   for i in range(num_actions - 1):
     adjacency_matrix[i, i + 1] = 1.0
     adjacency_matrix[i + 1, i] = 1.0
-  laplacian_matrix = np.diag(np.sum(adjacency_matrix,
-                                    axis=0)) - adjacency_matrix
-  return laplacian_matrix
+  return np.diag(np.sum(adjacency_matrix, axis=0)) - adjacency_matrix
 
 
 def compute_pairwise_distances(input_vecs: types.Tensor) -> types.Tensor:
@@ -144,8 +142,7 @@ def build_laplacian_nearest_neighbor_graph(input_vecs: types.Tensor,
   adjacency_matrix = tf.minimum(
       adjacency_matrix, tf.ones_like(adjacency_matrix))
   degree_matrix = tf.linalg.tensor_diag(tf.reduce_sum(adjacency_matrix, axis=1))
-  laplacian_matrix = degree_matrix - adjacency_matrix
-  return laplacian_matrix
+  return degree_matrix - adjacency_matrix
 
 
 def process_experience_for_neural_agents(

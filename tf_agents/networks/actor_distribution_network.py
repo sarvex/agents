@@ -150,12 +150,11 @@ class ActorDistributionNetwork(network.DistributionNetwork):
     def map_proj(spec):
       if tensor_spec.is_discrete(spec):
         return discrete_projection_net(spec)
-      else:
-        kwargs = {}
-        if continuous_projection_net is _normal_projection_net:
-          kwargs['seed'] = seed
-          kwargs['seed_stream_class'] = seed_stream_class
-        return continuous_projection_net(spec, **kwargs)
+      kwargs = {}
+      if continuous_projection_net is _normal_projection_net:
+        kwargs['seed'] = seed
+        kwargs['seed_stream_class'] = seed_stream_class
+      return continuous_projection_net(spec, **kwargs)
 
     projection_networks = tf.nest.map_structure(map_proj, output_tensor_spec)
     output_spec = tf.nest.map_structure(lambda proj_net: proj_net.output_spec,

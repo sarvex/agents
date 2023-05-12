@@ -124,7 +124,7 @@ class RandomPyEnvironment(py_environment.PyEnvironment):
 
   @property
   def batched(self) -> bool:
-    return False if self._batch_size is None else True
+    return self._batch_size is not None
 
   def _get_observation(self):
     batch_size = (self._batch_size,) if self._batch_size else ()
@@ -170,8 +170,7 @@ class RandomPyEnvironment(py_environment.PyEnvironment):
   def render(self, mode: Text = 'rgb_array') -> np.ndarray:
     if mode != 'rgb_array':
       raise ValueError(
-          "Only rendering mode supported is 'rgb_array', got {} instead.".
-          format(mode))
+          f"Only rendering mode supported is 'rgb_array', got {mode} instead.")
 
     return self._rng.randint(0, 256, size=self._render_size, dtype=np.uint8)
 

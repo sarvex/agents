@@ -78,13 +78,14 @@ class FixedPolicyAgent(tf_agent.TFAgent):
     super(FixedPolicyAgent, self).__init__(
         time_step_spec,
         action_spec,
-        policy,
+        collect_policy,
         collect_policy,
         train_sequence_length=None,
         debug_summaries=debug_summaries,
         summarize_grads_and_vars=summarize_grads_and_vars,
         train_step_counter=train_step_counter,
-        num_outer_dims=num_outer_dims)
+        num_outer_dims=num_outer_dims,
+    )
 
   def _initialize(self):
     pass

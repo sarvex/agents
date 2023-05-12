@@ -45,8 +45,7 @@ class SimpleConstraint(constraints.BaseConstraint):
     """Returns the probability of input actions being feasible."""
     batch_size = tf.shape(observation)[0]
     num_actions = self._action_spec.maximum - self._action_spec.minimum + 1
-    feasibility_prob = 0.5 * tf.ones([batch_size, num_actions], tf.float32)
-    return feasibility_prob
+    return 0.5 * tf.ones([batch_size, num_actions], tf.float32)
 
 
 class GreaterThan2Constraint(constraints.BaseConstraint):
@@ -55,8 +54,7 @@ class GreaterThan2Constraint(constraints.BaseConstraint):
     """Returns the probability of input actions being feasible."""
     if actions is None:
       actions = tf.range(self._action_spec.minimum, self._action_spec.maximum)
-    feasibility_prob = tf.cast(tf.greater(actions, 2), tf.float32)
-    return feasibility_prob
+    return tf.cast(tf.greater(actions, 2), tf.float32)
 
 
 class BaseConstraintTest(tf.test.TestCase):

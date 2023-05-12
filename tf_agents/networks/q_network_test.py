@@ -182,20 +182,14 @@ class SingleObservationSingleActionTest(tf.test.TestCase):
     self.assertAllClose(q_online, q_target, rtol=1.0, atol=1.0)
 
   def testCombinedFeatureColumnInput(self):
-    columns = {}
-    state_tensors = {}
-    state_specs = {}
-    expected_dim = 0
-
     indicator_key = 'indicator_key'
     vocab_list = [2, 3, 4]
     column1 = tf.feature_column.categorical_column_with_vocabulary_list(
         indicator_key, vocab_list)
-    columns[indicator_key] = tf.feature_column.indicator_column(column1)
-    state_tensors[indicator_key] = tf.expand_dims([3, 2, 2, 4, 3], -1)
-    state_specs[indicator_key] = tensor_spec.TensorSpec([1], tf.int32)
-    expected_dim += len(vocab_list)
-
+    columns = {indicator_key: tf.feature_column.indicator_column(column1)}
+    state_tensors = {indicator_key: tf.expand_dims([3, 2, 2, 4, 3], -1)}
+    state_specs = {indicator_key: tensor_spec.TensorSpec([1], tf.int32)}
+    expected_dim = 0 + len(vocab_list)
     embedding_key = 'embedding_key'
     embedding_dim = 3
     vocab_list = [2, 3, 4]

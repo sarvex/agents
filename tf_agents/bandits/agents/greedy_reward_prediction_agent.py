@@ -149,11 +149,10 @@ class GreedyRewardPredictionAgent(tf_agent.TFAgent):
         action_spec)
     self._accepts_per_arm_features = accepts_per_arm_features
     self._constraints = constraints
-    if num_samples_list:
-      if len(num_samples_list) != self._num_actions:
-        ValueError('num_samples_list is expected to have length equal to the ',
-                   'number of actions: ', self._num_actions,
-                   ' , but found to be', len(num_samples_list))
+    if num_samples_list and len(num_samples_list) != self._num_actions:
+      ValueError('num_samples_list is expected to have length equal to the ',
+                 'number of actions: ', self._num_actions,
+                 ' , but found to be', len(num_samples_list))
     self._num_samples_list = num_samples_list
 
     reward_network.create_variables()

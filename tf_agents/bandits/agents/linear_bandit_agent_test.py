@@ -152,9 +152,8 @@ def _get_initial_and_final_steps_with_per_arm_features(
               name='arm_observation')
   }
   if num_actions_feature:
-    observation.update({
-        'num_actions': tf.ones([batch_size], dtype=tf.int32) * (num_actions - 1)
-    })
+    observation['num_actions'] = tf.ones([batch_size],
+                                         dtype=tf.int32) * (num_actions - 1)
   if apply_action_mask:
     observation = (observation,
                    tf.ones([batch_size, num_actions], dtype=tf.int32))
@@ -182,8 +181,8 @@ def _get_initial_and_final_steps_with_per_arm_features(
               name='arm_observation')
   }
   if num_actions_feature:
-    observation.update(
-        {'num_actions': tf.ones([batch_size], dtype=tf.int32) * num_actions})
+    observation['num_actions'] = (tf.ones([batch_size], dtype=tf.int32) *
+                                  num_actions)
   if apply_action_mask:
     observation = (observation,
                    tf.ones([batch_size, num_actions], dtype=tf.int32))

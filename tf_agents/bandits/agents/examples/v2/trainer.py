@@ -40,11 +40,8 @@ def get_replay_buffer(data_spec,
                       batch_size,
                       steps_per_loop):
   """Return a `TFUniformReplayBuffer` for the given `agent`."""
-  buf = tf_uniform_replay_buffer.TFUniformReplayBuffer(
-      data_spec=data_spec,
-      batch_size=batch_size,
-      max_length=steps_per_loop)
-  return buf
+  return tf_uniform_replay_buffer.TFUniformReplayBuffer(
+      data_spec=data_spec, batch_size=batch_size, max_length=steps_per_loop)
 
 
 def set_expected_shape(experience, num_steps):

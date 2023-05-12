@@ -155,13 +155,16 @@ def create_sequential_actor_net():
 
 
 def _test_cases(prefix=''):
-  return [{
-      'testcase_name': '%s0' % prefix,
-      'network_cls': DummyActorNet,
-  }, {
-      'testcase_name': '%s1' % prefix,
-      'network_cls': DummyActorDistributionNet,
-  }]
+  return [
+      {
+          'testcase_name': f'{prefix}0',
+          'network_cls': DummyActorNet
+      },
+      {
+          'testcase_name': f'{prefix}1',
+          'network_cls': DummyActorDistributionNet,
+      },
+  ]
 
 
 class PPOPolicyTest(parameterized.TestCase, test_utils.TestCase):

@@ -299,7 +299,6 @@ class CreateVariablesTest(parameterized.TestCase, tf.test.TestCase):
           ()
       ),
   )
-  # pylint: enable=g-long-λ
   def testKerasLayerCreate(self, layer_fn, input_spec, expected_output_spec,
                            expected_state_spec):
     layer = layer_fn()
@@ -308,8 +307,10 @@ class CreateVariablesTest(parameterized.TestCase, tf.test.TestCase):
     output_spec = network.create_variables(layer, input_spec)
     self.assertTrue(layer.built)
     self.assertEqual(
-        output_spec, expected_output_spec,
-        '\n{}\nvs.\n{}\n'.format(output_spec, expected_output_spec))
+        output_spec,
+        expected_output_spec,
+        f'\n{output_spec}\nvs.\n{expected_output_spec}\n',
+    )
     output_spec_2 = network.create_variables(layer, input_spec)
     self.assertEqual(output_spec_2, expected_output_spec)
     state_spec = getattr(layer, '_network_state_spec', None)

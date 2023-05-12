@@ -133,8 +133,8 @@ class GreedyMultiObjectiveNeuralAgent(tf_agent.TFAgent):
     self._num_objectives = len(objective_network_and_loss_fn_sequence)
     if self._num_objectives < 2:
       raise ValueError(
-          'Number of objectives should be at least two, but found to be {}'
-          .format(self._num_objectives))
+          f'Number of objectives should be at least two, but found to be {self._num_objectives}'
+      )
     self._objective_networks, self._error_loss_fns = tuple(
         zip(*objective_network_and_loss_fn_sequence))
     self._optimizer = optimizer
@@ -175,9 +175,8 @@ class GreedyMultiObjectiveNeuralAgent(tf_agent.TFAgent):
     tf.compat.v1.variables_initializer(self.variables)
 
   def _variables_to_train(self):
-    variables_to_train = tf.nest.flatten(
+    return tf.nest.flatten(
         [net.trainable_variables for net in self._objective_networks])
-    return variables_to_train
 
   def _train(self, experience: types.NestedTensor,
              weights: types.Tensor) -> tf_agent.LossInfo:
@@ -242,9 +241,9 @@ class GreedyMultiObjectiveNeuralAgent(tf_agent.TFAgent):
     """
     if objective_idx >= self._num_objectives or objective_idx < 0:
       raise ValueError(
-          'objective_idx should be between 0 and {}, but is {}'.format(
-              self._num_objectives, objective_idx))
-    with tf.name_scope('loss_for_objective_{}'.format(objective_idx)):
+          f'objective_idx should be between 0 and {self._num_objectives}, but is {objective_idx}'
+      )
+    with tf.name_scope(f'loss_for_objective_{objective_idx}'):
       objective_network = self._objective_networks[objective_idx]
       sample_weights = weights if weights is not None else 1
       if self._heteroscedastic[objective_idx]:
@@ -312,13 +311,12 @@ class GreedyMultiObjectiveNeuralAgent(tf_agent.TFAgent):
           observations)
     if objective_values.shape.rank != 2:
       raise ValueError(
-          'The objectives tensor should be rank-2 [batch_size, num_objectives],'
-          ' but found to be rank-{}'.format(objective_values.shape.rank))
+          f'The objectives tensor should be rank-2 [batch_size, num_objectives], but found to be rank-{objective_values.shape.rank}'
+      )
     if objective_values.shape[1] != self._num_objectives:
       raise ValueError(
-          'The number of objectives in the objective_values tensor: {} '
-          'is different from the number of objective networks: {}.'.format(
-              objective_values.shape[1], self._num_objectives))
+          f'The number of objectives in the objective_values tensor: {objective_values.shape[1]} is different from the number of objective networks: {self._num_objectives}.'
+      )
 
     objective_losses = []
     for idx in range(self._num_objectives):
@@ -334,15 +332,15 @@ class GreedyMultiObjectiveNeuralAgent(tf_agent.TFAgent):
 
   def compute_summaries(self, losses: Sequence[tf.Tensor]):
     if self._num_objectives != len(losses):
-      raise ValueError('The number of losses: {} does not equal the number '
-                       'of objectives: {}'.format(
-                           len(losses), self._num_objectives))
+      raise ValueError(
+          f'The number of losses: {len(losses)} does not equal the number of objectives: {self._num_objectives}'
+      )
     if self.summaries_enabled:
       with tf.name_scope('Losses/'):
         for idx in range(self._num_objectives):
           name_of_loss = self._objective_networks[idx].name
           if not name_of_loss:
-            name_of_loss = 'loss_{}'.format(idx)
+            name_of_loss = f'loss_{idx}'
           tf.compat.v2.summary.scalar(
               name=name_of_loss, data=losses[idx], step=self.train_step_counter)
 

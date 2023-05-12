@@ -495,11 +495,11 @@ class SacAgentTest(parameterized.TestCase, test_utils.TestCase):
         common.initialize_uninitialized_variables(sess)
       self.assertEqual(self.evaluate(counter), 0)
       self.evaluate(experience)
-      self.assertEqual(self.evaluate(counter), 1)
     else:
       self.assertEqual(self.evaluate(counter), 0)
       self.evaluate(agent.train(experience))
-      self.assertEqual(self.evaluate(counter), 1)
+
+    self.assertEqual(self.evaluate(counter), 1)
 
   def testSharedLayer(self):
     shared_layer = tf.keras.layers.Dense(

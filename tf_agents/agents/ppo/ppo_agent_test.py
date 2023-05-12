@@ -1313,13 +1313,17 @@ def _create_experience_trajectory_my_action() -> trajectory.Trajectory:
 
   policy_info = {
       'dist_params': action_distribution_parameters,
+      'value_prediction': value_preds,
   }
-  policy_info['value_prediction'] = value_preds
-  experience = trajectory.Trajectory(time_steps.step_type, observations,
-                                     actions, policy_info,
-                                     time_steps.step_type, time_steps.reward,
-                                     time_steps.discount)
-  return experience
+  return trajectory.Trajectory(
+      time_steps.step_type,
+      observations,
+      actions,
+      policy_info,
+      time_steps.step_type,
+      time_steps.reward,
+      time_steps.discount,
+  )
 
 if __name__ == '__main__':
   tf.test.main()

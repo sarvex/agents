@@ -76,11 +76,10 @@ class ParallelPyEnvironment(py_environment.PyEnvironment):
       ValueError: If the action or observation specs don't match.
     """
     super(ParallelPyEnvironment, self).__init__()
-    if any([not callable(ctor) for ctor in env_constructors]):
+    if any(not callable(ctor) for ctor in env_constructors):
       raise TypeError(
-          'Found non-callable `env_constructors` in `ParallelPyEnvironment` '
-          '__init__ call. Did you accidentally pass in environment instances '
-          'instead of constructors? Got: {}'.format(env_constructors))
+          f'Found non-callable `env_constructors` in `ParallelPyEnvironment` __init__ call. Did you accidentally pass in environment instances instead of constructors? Got: {env_constructors}'
+      )
     self._envs = [ProcessPyEnvironment(ctor, flatten=flatten)
                   for ctor in env_constructors]
     self._num_envs = len(env_constructors)
@@ -178,14 +177,10 @@ class ParallelPyEnvironment(py_environment.PyEnvironment):
   def _unstack_actions(self, batched_actions):
     """Returns a list of actions from potentially nested batch of actions."""
     flattened_actions = tf.nest.flatten(batched_actions)
-    if self._flatten:
-      unstacked_actions = zip(*flattened_actions)
-    else:
-      unstacked_actions = [
-          tf.nest.pack_sequence_as(batched_actions, actions)
-          for actions in zip(*flattened_actions)
-      ]
-    return unstacked_actions
+    return (zip(*flattened_actions) if self._flatten else [
+        tf.nest.pack_sequence_as(batched_actions, actions)
+        for actions in zip(*flattened_actions)
+    ])
 
   def seed(self, seeds: Sequence[types.Seed]) -> Sequence[Any]:
     """Seeds the parallel environments."""
@@ -379,10 +374,7 @@ class ProcessPyEnvironment(object):
       time step when blocking, otherwise callable that returns the time step.
     """
     promise = self.call('step', action)
-    if blocking:
-      return promise()
-    else:
-      return promise
+    return promise() if blocking else promise
 
   def reset(self, blocking: bool = True) -> Union[ts.TimeStep, Promise]:
     """Reset the environment.
@@ -395,10 +387,7 @@ class ProcessPyEnvironment(object):
       observation.
     """
     promise = self.call('reset')
-    if blocking:
-      return promise()
-    else:
-      return promise
+    return promise() if blocking else promise
 
   def render(self,
              mode: Text = 'rgb_array',
@@ -420,10 +409,7 @@ class ProcessPyEnvironment(object):
       raise NotImplementedError('Only rgb_array rendering mode is supported. '
                                 'Got %s' % mode)
     promise = self.call('render')
-    if blocking:
-      return promise()
-    else:
-      return promise
+    return promise() if blocking else promise
 
   def _receive(self):
     """Wait for a message from the worker process and return its payload.
@@ -443,7 +429,7 @@ class ProcessPyEnvironment(object):
     if message == self._RESULT:
       return payload
     self.close()
-    raise KeyError('Received message of unexpected type {}'.format(message))
+    raise KeyError(f'Received message of unexpected type {message}')
 
   def _worker(self, conn):
     """The process waits for actions and sends back environment results.
@@ -484,11 +470,11 @@ class ProcessPyEnvironment(object):
           assert payload is None
           env.close()
           break
-        raise KeyError('Received message of unknown type {}'.format(message))
-    except Exception:  # pylint: disable=broad-except
+        raise KeyError(f'Received message of unknown type {message}')
+    except Exception:# pylint: disable=broad-except
       etype, evalue, tb = sys.exc_info()
       stacktrace = ''.join(traceback.format_exception(etype, evalue, tb))
-      message = 'Error in environment process: {}'.format(stacktrace)
+      message = f'Error in environment process: {stacktrace}'
       logging.error(message)
       conn.send((self._EXCEPTION, stacktrace))
     finally:

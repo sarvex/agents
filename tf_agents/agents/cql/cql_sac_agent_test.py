@@ -471,12 +471,12 @@ class CqlSacAgentTest(test_utils.TestCase, parameterized.TestCase):
         common.initialize_uninitialized_variables(sess)
       self.assertEqual(self.evaluate(counter), 0)
       self.evaluate(experience)
-      self.assertEqual(self.evaluate(counter), 1)
     else:
       self.assertEqual(self.evaluate(counter), 0)
       loss = self.evaluate(agent.train(experience))
       self.assertAllClose(loss.loss, expected_loss)
-      self.assertEqual(self.evaluate(counter), 1)
+
+    self.assertEqual(self.evaluate(counter), 1)
 
   @parameterized.parameters(
       (True, False, (-1, 10.0), 5.0, 3.032653, 2.895160, 3.130782),

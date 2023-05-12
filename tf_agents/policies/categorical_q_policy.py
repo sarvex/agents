@@ -95,8 +95,7 @@ class CategoricalQPolicy(tf_policy.TFPolicy):
                 action_spec, network_action_spec))
 
     if not isinstance(action_spec, tensor_spec.BoundedTensorSpec):
-      raise TypeError('action_spec must be a BoundedTensorSpec. Got: %s' % (
-          action_spec,))
+      raise TypeError(f'action_spec must be a BoundedTensorSpec. Got: {action_spec}')
 
     action_spec = cast(tensor_spec.BoundedTensorSpec, action_spec)
     if action_spec.minimum != 0:

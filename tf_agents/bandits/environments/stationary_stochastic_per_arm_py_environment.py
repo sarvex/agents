@@ -114,7 +114,7 @@ class StationaryStochasticPerArmPyEnvironment(
           dtype=np.dtype(type(self._num_actions_fn())),
           minimum=1,
           maximum=max_num_actions)
-      observation_spec.update({NUM_ACTIONS_KEY: num_actions_spec})
+      observation_spec[NUM_ACTIONS_KEY] = num_actions_spec
 
     action_spec = array_spec.BoundedArraySpec(
         shape=(),
@@ -146,7 +146,7 @@ class StationaryStochasticPerArmPyEnvironment(
       num_actions = [self._num_actions_fn() for _ in range(self._batch_size)]
       num_actions = np.maximum(num_actions, 1)
       num_actions = np.minimum(num_actions, self._max_num_actions)
-      self._observation.update({NUM_ACTIONS_KEY: num_actions})
+      self._observation[NUM_ACTIONS_KEY] = num_actions
     return self._observation
 
   def _apply_action(self, action: np.ndarray) -> types.Array:
@@ -155,8 +155,7 @@ class StationaryStochasticPerArmPyEnvironment(
     global_obs = self._observation[GLOBAL_KEY]
     batch_size_range = range(self.batch_size)
     arm_obs = self._observation[PER_ARM_KEY][batch_size_range, action, :]
-    reward = np.stack([
+    return np.stack([
         self._reward_fn(np.concatenate((global_obs[b, :], arm_obs[b, :])))
         for b in batch_size_range
     ])
-    return reward

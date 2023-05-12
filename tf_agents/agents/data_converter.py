@@ -41,10 +41,7 @@ def _is_transition_like(value):
     return True
 
   fields = getattr(value, '_fields', None)
-  if fields and trajectory.Transition._fields == fields:
-    return True
-
-  return False
+  return bool(fields and trajectory.Transition._fields == fields)
 
 
 def _is_trajectory_like(value):
@@ -53,10 +50,7 @@ def _is_trajectory_like(value):
     return True
 
   fields = getattr(value, '_fields', None)
-  if fields and trajectory.Trajectory._fields == fields:
-    return True
-
-  return False
+  return bool(fields and trajectory.Trajectory._fields == fields)
 
 
 def _as_tfa_transition(value: typing.Tuple[typing.Any, typing.Any, typing.Any]):
@@ -104,7 +98,7 @@ class DataContext(tf.Module):
     """
     def _each_isinstance(spec, spec_types):
       """Checks if each element of `spec` is instance of `spec_types`."""
-      return all([isinstance(s, spec_types) for s in tf.nest.flatten(spec)])
+      return all(isinstance(s, spec_types) for s in tf.nest.flatten(spec))
 
     for (spec, label) in ((time_step_spec, 'time_step_spec'),
                           (action_spec, 'action_spec'),
@@ -245,11 +239,8 @@ def _validate_transition(value: trajectory.Transition,
     debug_str_2 = tf.nest.map_structure(
         lambda spec: spec.shape, spec_to_validate)
     raise ValueError(
-        'All of the Tensors in `value` must have a single outer (batch size) '
-        'dimension. Specifically, tensors must have {} outer dimensions.'
-        '\nFull shapes of value tensors:\n  {}.\n'
-        'Expected shapes (excluding the outer dimensions):\n  {}.'
-        .format(num_outer_dims, debug_str_1, debug_str_2))
+        f'All of the Tensors in `value` must have a single outer (batch size) dimension. Specifically, tensors must have {num_outer_dims} outer dimensions.\nFull shapes of value tensors:\n  {debug_str_1}.\nExpected shapes (excluding the outer dimensions):\n  {debug_str_2}.'
+    )
 
 
 def _validate_state(state: types.NestedTensor, spec: types.NestedTensorSpec):
@@ -337,7 +328,7 @@ class AsTrajectory(tf.Module):
           reward=value.next_time_step.reward,
           discount=value.next_time_step.discount)
     else:
-      raise TypeError('Input type not supported: {}'.format(value))
+      raise TypeError(f'Input type not supported: {value}')
     _validate_trajectory(
         value, self._data_context.trajectory_spec,
         sequence_length=self._sequence_length,
@@ -422,7 +413,7 @@ class AsTransition(tf.Module):
         value = tf.nest.map_structure(
             lambda x: composite.squeeze(x, axis=1), value)
     else:
-      raise TypeError('Input type not supported: {}'.format(value))
+      raise TypeError(f'Input type not supported: {value}')
 
     num_outer_dims = 1 if self._squeeze_time_dim else 2
     _validate_transition(
@@ -521,7 +512,7 @@ class AsHalfTransition(tf.Module):
           observation=tf.zeros_like(value.discount))
       value = trajectory.Transition(time_steps, policy_steps, next_time_steps)
     else:
-      raise TypeError('Input type not supported: {}'.format(value))
+      raise TypeError(f'Input type not supported: {value}')
 
     num_outer_dims = 1 if self._squeeze_time_dim else 2
     _validate_transition(
@@ -599,7 +590,7 @@ class AsNStepTransition(tf.Module):
           sequence_length=None if self._n is None else self._n + 1)
       value = trajectory.to_n_step_transition(value, gamma=self._gamma)
     else:
-      raise TypeError('Input type not supported: {}'.format(value))
+      raise TypeError(f'Input type not supported: {value}')
 
     _validate_transition(
         value, self._data_context.transition_spec, num_outer_dims=1)

@@ -65,8 +65,8 @@ def scalarize_objectives(objectives_tensor: tf.Tensor,
   """
   if objectives_tensor.shape.rank != 3:
     raise ValueError(
-        'The objectives_tensor should be rank-3, but is rank-{}'.format(
-            objectives_tensor.shape.rank))
+        f'The objectives_tensor should be rank-3, but is rank-{objectives_tensor.shape.rank}'
+    )
   return tf.transpose(
       tf.map_fn(scalarizer, tf.transpose(objectives_tensor, perm=[2, 0, 1])))
 
@@ -142,8 +142,8 @@ class GreedyMultiObjectiveNeuralPolicy(tf_policy.TFPolicy):
         action_spec.shape.rank > 1 or
         action_spec.shape.num_elements() != 1):
       raise NotImplementedError(
-          'action_spec must be a BoundedTensorSpec of type int32 and shape (). '
-          'Found {}.'.format(action_spec))
+          f'action_spec must be a BoundedTensorSpec of type int32 and shape (). Found {action_spec}.'
+      )
     self._expected_num_actions = action_spec.maximum - action_spec.minimum + 1
     self._action_offset = action_spec.minimum
     policy_state_spec = []
@@ -155,8 +155,8 @@ class GreedyMultiObjectiveNeuralPolicy(tf_policy.TFPolicy):
     self._num_objectives = len(self._objective_networks)
     if self._num_objectives < 2:
       raise ValueError(
-          'Number of objectives should be at least two, but found to be {}'
-          .format(self._num_objectives))
+          f'Number of objectives should be at least two, but found to be {self._num_objectives}'
+      )
 
     self._emit_policy_info = emit_policy_info
     predicted_rewards_mean = ()
@@ -251,14 +251,14 @@ class GreedyMultiObjectiveNeuralPolicy(tf_policy.TFPolicy):
           network,
           heteroscedastic_q_network.HeteroscedasticQNetwork) else prediction
       if predicted_value.shape.rank != 2:
-        raise ValueError('Prediction from network {} shoud be a rank-2 tensor, '
-                         ' but has shape {}'.format(idx, predicted_value.shape))
+        raise ValueError(
+            f'Prediction from network {idx} shoud be a rank-2 tensor,  but has shape {predicted_value.shape}'
+        )
       if predicted_value.shape[1] is not None and predicted_value.shape[
           1] != self._expected_num_actions:
         raise ValueError(
-            'The number of actions ({}) does not match objective network {}'
-            ' output size ({}).'.format(self._expected_num_actions, idx,
-                                        predicted_value.shape[1]))
+            f'The number of actions ({self._expected_num_actions}) does not match objective network {idx} output size ({predicted_value.shape[1]}).'
+        )
       predicted_objective_values.append(predicted_value)
     # Stack the list of predicted objective tensors into a rank-3 tensor shaped
     # as [batch_size, num_of_objectives, num_of_actions].

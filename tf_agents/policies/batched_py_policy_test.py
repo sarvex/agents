@@ -82,11 +82,10 @@ class BatchedPyPolicyTest(tf.test.TestCase, parameterized.TestCase):
         [3], dtype=np.int16, minimum=-7.0, maximum=7.0)
 
   def _make_batched_py_policy(self, multithreading, num_policies=3):
-    policies = []
-    for _ in range(num_policies):
-      policies.append(MockPyPolicy(self.time_step_spec,
-                                   self.action_spec,
-                                   self.policy_state_spec))
+    policies = [
+        MockPyPolicy(self.time_step_spec, self.action_spec,
+                     self.policy_state_spec) for _ in range(num_policies)
+    ]
     return batched_py_policy.BatchedPyPolicy(
         policies=policies, multithreading=multithreading)
 
